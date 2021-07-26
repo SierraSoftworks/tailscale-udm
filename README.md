@@ -9,7 +9,7 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 2. Run the `install.sh` script to install `tailscale` and the startup script on your UDM.
    
    ```sh
-   curl https://raw.github.com/SierraSoftworks/tailscale-udm/master/install.sh | sh
+   curl https://raw.githubusercontent.com/juandp77/tailscale-udm/main/install.sh | sh
    ```
 3. Follow the on-screen steps to configure `tailscale` and connect it to your network.
 4. Confirm that `tailscale` is working by running `/mnt/data/tailscale/tailscale status`
