@@ -21,12 +21,7 @@ to provide a persistent service and runs using Tailscale's usermode networking f
    ```
 
 ## Uninstallation
-1. Kill the `tailscaled` daemon.
    
    ```sh
-   ps | grep tailscaled
-   kill <PID>
+   curl https://raw.githubusercontent.com/juandp77/tailscale-udm/main/uninstall.sh | sh
    ```
-2. Remove the boot script using `rm /mnt/data/on_boot.d/10-tailscaled.sh`
-3. Have tailscale cleanup after itself using `/mnt/data/tailscale/tailscaled --cleanup`.
-4. Remove the tailscale binaries and state using `rm -Rf /mnt/data/tailscale`.
