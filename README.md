@@ -14,6 +14,12 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 3. Follow the on-screen steps to configure `tailscale` and connect it to your network.
 4. Confirm that `tailscale` is working by running `/mnt/data/tailscale/tailscale status`
 
+## Upgrade
+
+   ```sh
+   curl https://raw.githubusercontent.com/juandp77/tailscale-udm/main/upgrade.sh | sh
+   ```
+
 ## Uninstallation
 1. Kill the `tailscaled` daemon.
    
