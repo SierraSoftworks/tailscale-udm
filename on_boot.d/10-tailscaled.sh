@@ -6,6 +6,8 @@ FLAGS="--tun userspace-networking"
 ## starts tailscaled
 
 /mnt/data/tailscale/tailscaled --cleanup
+
+# shellcheck disable=SC2086
 nohup /mnt/data/tailscale/tailscaled \
     --state=/mnt/data/tailscale/tailscaled.state \
     --socket=/var/run/tailscale/tailscaled.sock \

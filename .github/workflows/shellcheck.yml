@@ -1,0 +1,25 @@
+name: Shellcheck
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+
+    - name: Register ShellCheck problem matchers
+      uses: lumaxis/shellcheck-problem-matchers@v1.1.2
+
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      env:
+        SHELLCHECK_OPTS: -e SC2148
+      with:
+        check_together: 'yes'

@@ -1,16 +1,16 @@
 #!/bin/sh
 set -e
 
-VERSION="1.12.3"
-WORKDIR=`mktemp -d || exit 1`
-trap "rm -rf ${WORKDIR}" EXIT
+VERSION="${1:-1.12.3}"
+WORKDIR="$(mktemp -d || exit 1)"
+trap 'rm -rf ${WORKDIR}' EXIT
 TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
 
 echo "Installing Tailscale in /mnt/data/tailscale"
-curl -sSL -o "${TAILSCALE_TGZ}" https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz
+curl -sSL -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
 tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
 mkdir -p /mnt/data/tailscale
-cp -R ${WORKDIR}/tailscale_${VERSION}_arm64/* /mnt/data/tailscale/
+cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* /mnt/data/tailscale/
 
 echo "Installing Tailscale upgrade script in /mnt/data/tailscale/upgrade.sh"
 curl -o /mnt/data/tailscale/upgrade.sh -sSL https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/upgrade.sh
