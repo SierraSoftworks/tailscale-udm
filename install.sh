@@ -12,8 +12,11 @@ tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
 mkdir -p /mnt/data/tailscale
 cp -R ${WORKDIR}/tailscale_${VERSION}_arm64/* /mnt/data/tailscale/
 
+echo "Installing Tailscale upgrade script in /mnt/data/tailscale/upgrade.sh"
+curl -o /mnt/data/tailscale/upgrade.sh -sSL https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/upgrade.sh
+
 echo "Installing boot script for Tailscale"
-curl -o /mnt/data/on_boot.d/10-tailscaled.sh -sSL https://raw.githubusercontent.com/pkwarren/tailscale-udm/main/on_boot.d/10-tailscaled.sh
+curl -o /mnt/data/on_boot.d/10-tailscaled.sh -sSL https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/on_boot.d/10-tailscaled.sh
 chmod +x /mnt/data/on_boot.d/10-tailscaled.sh
 
 echo "Starting tailscaled service"
