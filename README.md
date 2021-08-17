@@ -22,7 +22,7 @@ Upgrading can be done by running the upgrade script below.
 /mnt/data/tailscale/upgrade.sh 1.12.3
 ```
 
-## a Remove Tailscale
+### Remove Tailscale
 To remove Tailscale, you can run the following command, or run the steps below manually.
    
 ```sh
