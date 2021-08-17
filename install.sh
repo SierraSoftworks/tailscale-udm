@@ -1,18 +1,19 @@
 #!/bin/sh
 set -e
 
-VERSION="1.8.0"
+VERSION="1.12.3"
+WORKDIR=`mktemp -d || exit 1`
+trap "rm -rf ${WORKDIR}" EXIT
+TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
 
 echo "Installing Tailscale in /mnt/data/tailscale"
-rm -f /tmp/tailscale.tgz
-curl -o /tmp/tailscale.tgz https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz
-mkdir -p /tmp/tailscale
-tar xzf /tmp/tailscale.tgz -C /tmp/tailscale
+curl -sSL -o "${TAILSCALE_TGZ}" https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz
+tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
 mkdir -p /mnt/data/tailscale
-cp -R /tmp/tailscale/tailscale_${VERSION}_arm64/* /mnt/data/tailscale/
+cp -R ${WORKDIR}/tailscale_${VERSION}_arm64/* /mnt/data/tailscale/
 
 echo "Installing boot script for Tailscale"
-curl -o /mnt/data/on_boot.d/10-tailscaled.sh -L https://raw.github.com/SierraSoftworks/tailscale-udm/master/on_boot.d/10-tailscaled.sh
+curl -o /mnt/data/on_boot.d/10-tailscaled.sh -sSL https://raw.githubusercontent.com/pkwarren/tailscale-udm/main/on_boot.d/10-tailscaled.sh
 chmod +x /mnt/data/on_boot.d/10-tailscaled.sh
 
 echo "Starting tailscaled service"
