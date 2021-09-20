@@ -19,9 +19,8 @@ echo "Installing boot script for Tailscale"
 curl -o /mnt/data/on_boot.d/10-tailscaled.sh -sSL https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/on_boot.d/10-tailscaled.sh
 chmod +x /mnt/data/on_boot.d/10-tailscaled.sh
 
+echo "Installing tailscale env script"
+curl -o /mnt/data/tailscale/tailscale-env -sSL https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/tailscale-env
+
 echo "Starting tailscaled service"
 /mnt/data/on_boot.d/10-tailscaled.sh
-sleep 5
-
-echo "Starting tailscale"
-/mnt/data/tailscale/tailscale up
