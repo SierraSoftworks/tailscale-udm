@@ -13,8 +13,8 @@ mkdir -p /mnt/data/tailscale
 cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* /mnt/data/tailscale/
 
 echo "Shutting down tailscaled"
-/mnt/data/tailscale/tailscale down
-killall tailscaled
+/mnt/data/tailscale/tailscale down >/dev/null && echo "DONE" || echo "DONE"
+killall tailscaled >/dev/null && echo "DONE" || echo "DONE"
 
 echo "Starting tailscaled service"
 /mnt/data/on_boot.d/10-tailscaled.sh
