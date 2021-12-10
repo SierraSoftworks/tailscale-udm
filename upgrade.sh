@@ -10,11 +10,12 @@ echo "Installing Tailscale in /mnt/data/tailscale"
 curl -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
 tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
 mkdir -p /mnt/data/tailscale
-cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* /mnt/data/tailscale/
 
 echo "Shutting down tailscaled"
 /mnt/data/tailscale/tailscale down >/dev/null && echo "DONE" || echo "DONE"
 killall tailscaled >/dev/null && echo "DONE" || echo "DONE"
+
+cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* /mnt/data/tailscale/
 
 echo "Starting tailscaled service"
 /mnt/data/on_boot.d/10-tailscaled.sh
