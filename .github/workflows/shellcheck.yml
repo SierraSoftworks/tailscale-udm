@@ -23,4 +23,3 @@ jobs:
         SHELLCHECK_OPTS: -e SC2148
       with:
         check_together: 'yes'
-        additional_files: 'tailscale-env'
