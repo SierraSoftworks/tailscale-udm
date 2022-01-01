@@ -3,7 +3,7 @@ set -xe
 
 # source environment variables such as PORT, TAILSCALE_FLAGS, etc.
 TAILSCALE_ENV="/mnt/data/tailscale/tailscale-env"
-# shellcheck source=/dev/null
+# shellcheck source=tailscale-env
 . "${TAILSCALE_ENV}"
 
 PORT="${PORT:-41641}"
