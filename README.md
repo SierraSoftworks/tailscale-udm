@@ -6,7 +6,9 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 
 ## Instructions
 ### Install Tailscale
-1. Follow the steps to install the boostchicken `on-boot-script` [here](https://github.com/boostchicken/udm-utilities/tree/master/on-boot-script).
+1. Follow the steps to install the boostchicken `on-boot-script` [here](https://github.com/boostchicken-dev/udm-utilities/tree/master/on-boot-script).
+
+   ⚠ Make sure that you exit the `unifi-os` shell before moving onto step 2 (or you won't be able to find the `/mnt/data` directory).
 2. Run the `install.sh` script to install `tailscale` and the startup script on your UDM.
    
    ```sh
