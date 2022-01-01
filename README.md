@@ -16,7 +16,7 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 4. Confirm that `tailscale` is working by running `/mnt/data/tailscale/tailscale status`
 
 ### Upgrade Tailscale
-Upgrading can be done by running the upgrade script below.
+Upgrading can be done by running the upgrade script below (replace `1.12.3` with the version you want to upgrade to).
 
 ```sh
 /mnt/data/tailscale/upgrade.sh 1.12.3
