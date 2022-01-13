@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [[ ! -f /mnt/data/tailscale/tailscale ]]; then
+if [ ! -f /mnt/data/tailscale/tailscale ]; then
   echo "Tailscale is not installed on this device."
   exit 1
 fi
