@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [[ ! -f /mnt/data/tailscale/tailscale ]]; then
+  echo "Tailscale is not installed on this device."
+  exit 1
+fi
+
 echo "Shutting down tailscaled"
 /mnt/data/tailscale/tailscale down
 killall tailscaled
