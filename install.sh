@@ -1,28 +1,23 @@
 #!/bin/sh
 set -e
 
-VERSION="${TAILSCALE_VERSION:-$1}"
-VERSION="${VERSION:-$(curl -sSLq 'https://api.github.com/repos/tailscale/tailscale/releases' | jq -r '.[0].tag_name | capture("v(?<version>.+)").version')}"
+# Determine the latest version of the Tailscale UDM package
+VERSION="${1:-$(curl -sSLq 'https://api.github.com/repos/SierraSoftworks/tailscale-udm/releases' | jq -r '.[0].tag_name')}"
+
+# Setup a temporary directory to download the package
 WORKDIR="$(mktemp -d || exit 1)"
 trap 'rm -rf ${WORKDIR}' EXIT
-TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
 
-echo "Installing Tailscale in /mnt/data/tailscale"
-curl -sSL -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
-tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
-mkdir -p /mnt/data/tailscale
-cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* /mnt/data/tailscale/
+# Download the Tailscale-UDM package
+curl -sSL -o "${WORKDIR}/tailscale.tgz" "https://gihub.com/SierraSoftworks/tailscale-udm/releases/download/${VERSION}/tailscale-udm.tgz"
 
-echo "Installing Tailscale upgrade script in /mnt/data/tailscale/upgrade.sh"
-curl -o /mnt/data/tailscale/upgrade.sh -sSLq https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/upgrade.sh
-chmod +x /mnt/data/tailscale/upgrade.sh
+# Extract the package
+tar xzf "${WORKDIR}/tailscale.tgz" -C "/mnt/data/"
 
-echo "Installing boot script for Tailscale"
-curl -o /mnt/data/on_boot.d/10-tailscaled.sh -sSLq https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/on_boot.d/10-tailscaled.sh
-chmod +x /mnt/data/on_boot.d/10-tailscaled.sh
+# Run the setup script to ensure that Tailscale is installed
+# shellcheck source=package/manage.sh
+/mnt/data/tailscale/manage.sh install "${TAILSCALE_VERSION}"
 
-echo "Installing tailscale env script"
-curl -o /mnt/data/tailscale/tailscale-env -sSLq https://raw.githubusercontent.com/SierraSoftworks/tailscale-udm/main/tailscale-env
-
-echo "Starting tailscaled service"
-/mnt/data/on_boot.d/10-tailscaled.sh
+# Start the tailscaled daemon
+# shellcheck source=package/manage.sh
+/mnt/data/tailscale/manage.sh start
