@@ -50,7 +50,7 @@ case $1 in
     tailscale_start  
     ;;
   "on-boot")
-    # shellcheck source=tailscale-env
+    # shellcheck source=package/tailscale-env
     . "${TAILSCALE_ROOT}/tailscale-env"
 
     if [ "${TAILSCALE_AUTOUPDATE}" = "true" ]; then
@@ -66,7 +66,7 @@ case $1 in
 esac
 
 tailscale_start() {
-  # shellcheck source=tailscale-env
+  # shellcheck source=package/tailscale-env
   . "${TAILSCALE_ROOT}/tailscale-env"
 
   PORT="${PORT:-41641}"
