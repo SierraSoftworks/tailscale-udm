@@ -11,9 +11,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 
-echo '#!/usr/bin/env bash' > "${WORKDIR}/tailscale"
-echo 'echo "0.0.0"' >> "${WORKDIR}/tailscale"
-chmod +x "${WORKDIR}/tailscale"
+mock "${WORKDIR}/tailscale" "0.0.0"
 
 assert_eq "$("${ROOT}/package/manage.sh" status)" "Tailscaled is not running" "Tailscaled should be reported as not running"
 

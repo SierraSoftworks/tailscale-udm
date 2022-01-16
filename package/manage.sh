@@ -48,7 +48,7 @@ tailscale_stop() {
   echo "Stopping Tailscale..."
   $TAILSCALE down
 
-  killall tailscaled
+  killall tailscaled 2>/dev/null || true
 
   $TAILSCALED --cleanup
 }
@@ -117,10 +117,13 @@ case $1 in
     tailscale_uninstall
     ;;
   "update")
+    if [ -f "${TAILSCALED_SOCK}" ]; then
+      echo "Tailscaled is running, please stop it before updating"
+      exit 1
+    fi
+
     if tailscale_has_update "$2"; then
-      tailscale_stop
       tailscale_install "$2"
-      tailscale_start  
     else
       echo "Tailscale is already up to date"
     fi
