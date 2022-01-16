@@ -1,0 +1,18 @@
+on:
+  push: {}
+
+name: Build
+jobs:
+  build:
+    name: "Package"
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./build/package.sh ./ ./dist
+
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./tests/run.sh

@@ -1,0 +1,17 @@
+on:
+  release:
+    types:
+      - published
+
+name: Release
+jobs:
+  release:
+    name: "Package"
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./build/package.sh ./ ./dist
+      - uses: SierraSoftworks/gh-releases@v1.0.6
+        with:
+          files: ./dist/tailscale-udm.tgz
+          overwrite: 'true'
