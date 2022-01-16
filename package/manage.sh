@@ -15,7 +15,7 @@ tailscale_start() {
   TAILSCALED_FLAGS="${TAILSCALED_FLAGS:-"--tun userspace-networking"}"
   LOG_FILE="${TAILSCALE_ROOT}/tailscaled.log"
 
-  if [ -f "${TAILSCALED_SOCK}" ]; then
+  if [ -e "${TAILSCALED_SOCK}" ]; then
     echo "Tailscaled is already running"
   else
     echo "Starting Tailscaled..."
@@ -31,7 +31,7 @@ tailscale_start() {
     # Wait a few seconds for the daemon to start
     sleep 5
 
-    if [ -f "${TAILSCALED_SOCK}" ]; then
+    if [ -e "${TAILSCALED_SOCK}" ]; then
       echo "Tailscaled started successfully"
     else
       echo "Tailscaled failed to start"
@@ -87,7 +87,7 @@ tailscale_has_update() {
 
 case $1 in
   "status")
-    if [ -f "${TAILSCALED_SOCK}" ]; then
+    if [ -e "${TAILSCALED_SOCK}" ]; then
       echo "Tailscaled is running"
       $TAILSCALE --version
     else
@@ -105,7 +105,7 @@ case $1 in
     tailscale_start
     ;;
   "install")
-    if [ -f "${TAILSCALE}" ]; then
+    if [ -e "${TAILSCALE}" ]; then
       echo "Tailscale is already installed, if you wish to update it, run '$0 update'"
       exit 0
     fi
@@ -117,12 +117,12 @@ case $1 in
     tailscale_uninstall
     ;;
   "update")
-    if [ -f "${TAILSCALED_SOCK}" ]; then
-      echo "Tailscaled is running, please stop it before updating"
-      exit 1
-    fi
-
     if tailscale_has_update "$2"; then
+      if [ -e "${TAILSCALED_SOCK}" ]; then
+        echo "Tailscaled is running, please stop it before updating"
+        exit 1
+      fi
+
       tailscale_install "$2"
     else
       echo "Tailscale is already up to date"
