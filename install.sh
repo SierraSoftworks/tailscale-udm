@@ -9,7 +9,7 @@ WORKDIR="$(mktemp -d || exit 1)"
 trap 'rm -rf ${WORKDIR}' EXIT
 
 # Download the Tailscale-UDM package
-curl -sSL -o "${WORKDIR}/tailscale.tgz" "https://gihub.com/SierraSoftworks/tailscale-udm/releases/download/${VERSION}/tailscale-udm.tgz"
+curl -sSL -o "${WORKDIR}/tailscale.tgz" "https://github.com/SierraSoftworks/tailscale-udm/releases/download/${VERSION}/tailscale-udm.tgz"
 
 # Extract the package
 tar xzf "${WORKDIR}/tailscale.tgz" -C "/mnt/data/"
