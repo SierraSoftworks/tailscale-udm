@@ -27,7 +27,7 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 
 ### Upgrading Tailscale
 ```sh
-/mnt/data/tailscale/manage.sh upgrade
+/mnt/data/tailscale/manage.sh update
 ```
 
 ### Remove Tailscale
