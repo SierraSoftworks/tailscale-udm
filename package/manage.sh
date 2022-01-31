@@ -61,7 +61,7 @@ tailscale_install() {
 
   echo "Installing Tailscale v${VERSION} in ${TAILSCALE_ROOT}..."
   curl -sSL -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
-  tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
+  tar xfz "${TAILSCALE_TGZ}" -C "${WORKDIR}"
   mkdir -p "${TAILSCALE_ROOT}"
   cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* "${TAILSCALE_ROOT}"
   
