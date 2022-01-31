@@ -12,7 +12,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 curl -sSL -o "${WORKDIR}/tailscale.tgz" "https://github.com/SierraSoftworks/tailscale-udm/releases/download/${VERSION}/tailscale-udm.tgz"
 
 # Extract the package
-tar xzf "${WORKDIR}/tailscale.tgz" -C "/mnt/data/"
+tar xfz "${WORKDIR}/tailscale.tgz" -C "/mnt/data/"
 
 # Run the setup script to ensure that Tailscale is installed
 # shellcheck source=package/manage.sh
