@@ -54,7 +54,7 @@ tailscale_stop() {
 }
 
 tailscale_install() {
-  VERSION="${1:-$(curl -sSLq 'https://api.github.com/repos/tailscale/tailscale/releases' | jq -r '.[0].tag_name | capture("v(?<version>.+)").version')}"
+  VERSION="${1:-$(curl -sSLq 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
   WORKDIR="$(mktemp -d || exit 1)"
   trap 'rm -rf ${WORKDIR}' EXIT
   TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
@@ -77,7 +77,7 @@ tailscale_uninstall() {
 
 tailscale_has_update() {
   CURRENT_VERSION="$($TAILSCALE --version | head -n 1)"
-  TARGET_VERSION="${1:-$(curl -sSLq 'https://api.github.com/repos/tailscale/tailscale/releases' | jq -r '.[0].tag_name | capture("v(?<version>.+)").version')}"
+  TARGET_VERSION="${1:-$(curl -sSLq 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
   if [ "${CURRENT_VERSION}" != "${TARGET_VERSION}" ]; then
     return 0
   else
