@@ -60,7 +60,12 @@ tailscale_install() {
   TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
 
   echo "Installing Tailscale v${VERSION} in ${TAILSCALE_ROOT}..."
-  curl -sSLf -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
+  curl -sSLf -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz" || {
+    echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
+    echo "Please make sure that you're using a valid version number and try again."
+    exit 1
+  }
+  
   tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
   mkdir -p "${TAILSCALE_ROOT}"
   cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* "${TAILSCALE_ROOT}"
