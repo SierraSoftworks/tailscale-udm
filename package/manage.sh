@@ -54,13 +54,18 @@ tailscale_stop() {
 }
 
 tailscale_install() {
-  VERSION="${1:-$(curl -sSLq 'https://api.github.com/repos/tailscale/tailscale/releases' | jq -r '.[0].tag_name | capture("v(?<version>.+)").version')}"
+  VERSION="${1:-$(curl -sSLq 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
   WORKDIR="$(mktemp -d || exit 1)"
   trap 'rm -rf ${WORKDIR}' EXIT
   TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
 
   echo "Installing Tailscale v${VERSION} in ${TAILSCALE_ROOT}..."
-  curl -sSL -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
+  curl -sSLf -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz" || {
+    echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
+    echo "Please make sure that you're using a valid version number and try again."
+    exit 1
+  }
+  
   tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
   mkdir -p "${TAILSCALE_ROOT}"
   cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* "${TAILSCALE_ROOT}"
@@ -77,7 +82,7 @@ tailscale_uninstall() {
 
 tailscale_has_update() {
   CURRENT_VERSION="$($TAILSCALE --version | head -n 1)"
-  TARGET_VERSION="${1:-$(curl -sSLq 'https://api.github.com/repos/tailscale/tailscale/releases' | jq -r '.[0].tag_name | capture("v(?<version>.+)").version')}"
+  TARGET_VERSION="${1:-$(curl -sSLq 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
   if [ "${CURRENT_VERSION}" != "${TARGET_VERSION}" ]; then
     return 0
   else
