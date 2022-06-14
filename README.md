@@ -20,7 +20,19 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 4. Confirm that `tailscale` is working by running `/mnt/data/tailscale/tailscale status`
 
 ## Management
+### Configuring Tailscale
+You can configure Tailscale using all the normal `tailscale up` options, you'll find the binary at
+`/mnt/data/tailscale/tailscale`. *Unfortunately we can't make changes to your `$PATH` to expose the
+normal `tailscale` command, so you'll need to specify the full path when calling it.*
+
+```sh
+/mnt/data/tailscale/tailscale up --advertise-routes=10.0.0.0/24 --advertise-exit-node --advertise-tags=tag:it
+```
+
 ### Restarting Tailscale
+The `manage.sh` script takes care of installing, starting, stopping, updating, and uninstalling Tailscale.
+Run it without any arguments to see the options.
+
 ```sh
 /mnt/data/tailscale/manage.sh restart
 ```
@@ -47,3 +59,23 @@ To remove Tailscale, you can run the following command, or run the steps below m
 There are clearly lots of folks who are interested in running Tailscale on their UDMs. If
 you're one of those people and have an idea for how this can be improved, please create a
 PR and we'll be more than happy to incorporate the changes.
+
+## Frequently Asked Questions
+
+### How do I advertise routes?
+You do this by updating your Tailscale configuration as you would on any other machine,
+just remember to provide the full path to the `tailscale` binary when doing so.
+
+```sh
+# Specify the routes you'd like to advertise using their CIDR notation
+/mnt/data/tailscale/tailscale up --advertise-routes="10.0.0.0/24,192.168.0.0/24"
+```
+
+### Can I route traffic from machines on my local network to Tailscale endpoints automatically?
+Currently we are not aware of any supported means of achieving this. Tailscale's
+subnet routing is intended for Tailscale-to-subnet connections and doesn't provide
+explicit support for subnet-to-Tailscale connections.
+
+### Why can't I see a network interface for Tailscale?
+Tailscale runs as a userspace networking component on the UDM rather than as a TUN
+interface, which means you won't see it in the `ip addr` list.
