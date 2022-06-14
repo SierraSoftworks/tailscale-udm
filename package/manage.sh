@@ -22,7 +22,7 @@ tailscale_start() {
     $TAILSCALED --cleanup > "${LOG_FILE}" 2>&1
 
     # shellcheck disable=SC2086
-    nohup $TAILSCALED \
+    setsid $TAILSCALED \
       --state "${TAILSCALE_ROOT}/tailscaled.state" \
       --socket "${TAILSCALED_SOCK}" \
       --port "${PORT}" \
@@ -39,6 +39,7 @@ tailscale_start() {
     fi
 
     # Run tailscale up to configure
+    echo "Running tailscale up to configure interface..."
     # shellcheck disable=SC2086
     $TAILSCALE up $TAILSCALE_FLAGS
   fi
@@ -46,7 +47,7 @@ tailscale_start() {
 
 tailscale_stop() {
   echo "Stopping Tailscale..."
-  $TAILSCALE down
+  $TAILSCALE down || true
 
   killall tailscaled 2>/dev/null || true
 
