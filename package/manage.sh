@@ -134,6 +134,15 @@ case $1 in
       echo "Tailscale is already up to date"
     fi
     ;;
+  "update!")
+    if tailscale_has_update "$2"; then
+      tailscale_stop
+      tailscale_install "$2"
+      tailscale_start
+    else
+      echo "Tailscale is already up to date"
+    fi
+    ;;
   "on-boot")
     # shellcheck source=package/tailscale-env
     . "${TAILSCALE_ROOT}/tailscale-env"
