@@ -79,3 +79,16 @@ explicit support for subnet-to-Tailscale connections.
 ### Why can't I see a network interface for Tailscale?
 Tailscale runs as a userspace networking component on the UDM rather than as a TUN
 interface, which means you won't see it in the `ip addr` list.
+
+### Does this support Tailscale SSH?
+You bet, make sure you're running the latest version of Tailscale and then run `tailscale up --ssh`
+to enable it. You'll need to setup SSH ACLs in your account by following
+[this guide](https://tailscale.com/kb/1193/tailscale-ssh/).
+
+```sh
+# Update Tailscale to its latest version
+/mnt/data/tailscale/manage.sh update!
+
+# Enable SSH advertisment through Tailscale
+/mnt/data/tailscale/tailscale up --ssh
+```
