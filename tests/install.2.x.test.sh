@@ -10,6 +10,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
+export OS_VERSION="v2"
 
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
 

@@ -10,6 +10,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
+export OS_VERSION="v1"
 
 mock "${WORKDIR}/tailscale" "0.0.0"
 
