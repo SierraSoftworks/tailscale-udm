@@ -10,7 +10,7 @@ echo "Preparing temporary build directory"
 mkdir -p "${WORKDIR}/tailscale" "${WORKDIR}/on_boot.d"
 cp "${SOURCE}/package/on-boot.sh" "${WORKDIR}/on_boot.d/10-tailscaled.sh"
 cp "${SOURCE}/package/manage.sh" "${WORKDIR}/tailscale/manage.sh"
-cp "${SOURCE}/package/unios_*.sh" "${WORKDIR}/tailscale/"
+cp "${SOURCE}/package/unios_"*".sh" "${WORKDIR}/tailscale/"
 cp "${SOURCE}/package/tailscale-env" "${WORKDIR}/tailscale/tailscale-env"
 cp "${SOURCE}/LICENSE" "${WORKDIR}/tailscale/LICENSE"
 
