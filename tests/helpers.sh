@@ -34,7 +34,7 @@ assert_contains() {
     local TEST_NAME="${3?You must specify the test name as the third argument}"
 
     
-    if (echo "$ACTUAL_OUTPUT" grep "$EXPECTED_OUTPUT" -q); then
+    if (echo "$ACTUAL_OUTPUT" | grep "$EXPECTED_OUTPUT" -q); then
         echo "  ✅  $TEST_NAME"
     else
         echo "  ❌  $TEST_NAME"
