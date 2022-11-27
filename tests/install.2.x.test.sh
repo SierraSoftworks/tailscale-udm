@@ -8,6 +8,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 # shellcheck source=tests/helpers.sh
 . "${ROOT}/tests/helpers.sh"
 
+export PACKAGE_ROOT="${ROOT}/package"
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 export OS_VERSION="v2"
