@@ -1,5 +1,4 @@
 #!/bin/sh
-export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/mnt/data/tailscale}"
 export TAILSCALE="${TAILSCALE_ROOT}/tailscale"
 export TAILSCALED="${TAILSCALE_ROOT}/tailscaled"
 export TAILSCALED_SOCK="${TAILSCALED_SOCK:-/var/run/tailscale/tailscaled.sock}"

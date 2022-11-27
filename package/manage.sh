@@ -1,14 +1,15 @@
 #!/bin/sh
 set -e
 
+export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/mnt/data/tailscale}"
 OS_VERSION="${OS_VERSION:-$(grep 'VERSION_ID=' /etc/os-release | grep -oE 'v[^.]+')}"
 
 if [ "$OS_VERSION" = 'v1' ]; then
   # shellcheck source=package/unios_1.x.sh
-  . /mnt/data/tailscale/package/unios_1.x.sh
+  . "$TAILSCALE_ROOT/package/unios_1.x.sh"
 elif [ "$OS_VERSION" = 'v2' ]; then
   # shellcheck source=package/unios_2.x.sh
-  . /mnt/data/tailscale/package/unios_2.x.sh
+  . "$TAILSCALE_ROOT/package/unios_2.x.sh"
 else
   echo "Unsupported UniFi OS version ($OS_VERSION)."
   echo "Please provide the following information to us on GitHub:"
