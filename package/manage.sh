@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-PACKAGE_ROOT="${TAILSCALE_ROOT:-/mnt/data/tailscale}"
+PACKAGE_ROOT="${PACKAGE_ROOT:-/mnt/data/tailscale}"
 OS_VERSION="${OS_VERSION:-$(grep 'VERSION_ID=' /etc/os-release | grep -oE 'v[^.]+')}"
 
 if [ "$OS_VERSION" = 'v1' ]; then
