@@ -1,5 +1,4 @@
 #!/bin/sh
-export TAILSCALE="/usr/bin/tailscale"
 
 _tailscale_is_running() {
     systemctl is-active --quiet tailscaled
@@ -21,7 +20,7 @@ _tailscale_start() {
     # Run tailscale up to configure
     echo "Running tailscale up to configure interface..."
     # shellcheck disable=SC2086
-    timeout 5 $TAILSCALE up
+    timeout 5 tailscale up
 }
 
 _tailscale_stop() {
