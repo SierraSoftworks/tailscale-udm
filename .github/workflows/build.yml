@@ -9,6 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: ./build/package.sh ./ ./dist
+      - uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: dist
 
   test:
     name: Test
