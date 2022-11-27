@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export TAILSCALE="tailscale"
+
 _tailscale_is_running() {
     systemctl is-active --quiet tailscaled
 }
