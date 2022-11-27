@@ -52,7 +52,7 @@ mock() {
 
     tee "$MOCK_PATH" >/dev/null <<EOF
 #!/usr/bin/env bash
-echo "\$*" >> "${MOCK_PATH}.args"
+echo "\${@}" >> "${MOCK_PATH}.args"
 echo "$OUTPUT"
 exit $EXIT_CODE
 EOF
