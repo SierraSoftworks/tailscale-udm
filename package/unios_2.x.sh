@@ -35,7 +35,7 @@ _tailscale_install() {
     TAILSCALE_DEB="${WORKDIR}/tailscale.deb"
 
     echo "Downloading Tailscale ${VERSION}..."
-    curl -sSLf --ipv4 -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/debian/pool/tailscale_${VERSION}_arm64.deb" || {
+    curl -sSLf --ipv4 -o "${TAILSCALE_DEB}" "https://pkgs.tailscale.com/stable/debian/pool/tailscale_${VERSION}_arm64.deb" || {
         echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/stable/debian/pool/tailscale_${VERSION}_arm64.deb"
         echo "Please make sure that you're using a valid version number and try again."
         exit 1
@@ -50,7 +50,7 @@ _tailscale_install() {
     echo "Restarting Tailscale daemon to detect new configuration..."
     systemctl restart tailscaled
   
-  echo "Installation complete, run '$0 start' to start Tailscale"
+    echo "Installation complete, run '$0 start' to start Tailscale"
 }
 
 _tailscale_uninstall() {
