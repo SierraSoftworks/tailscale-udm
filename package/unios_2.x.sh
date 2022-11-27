@@ -49,6 +49,9 @@ _tailscale_install() {
 
     echo "Restarting Tailscale daemon to detect new configuration..."
     systemctl restart tailscaled
+
+    echo "Enabling Tailscale to start on boot..."
+    systemctl enable tailscaled
   
     echo "Installation complete, run '$0 start' to start Tailscale"
 }
