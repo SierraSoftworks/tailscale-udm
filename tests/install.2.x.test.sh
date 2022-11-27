@@ -46,6 +46,6 @@ chmod +x "${WORKDIR}/systemctl"
 
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
 
-assert_eq "$(cat "${WORKDIR}/dpkg.args")" "-i ${WORKDIR}/tailscale.deb" "The dpkg command should be called with the correct arguments"
+assert_contains "$(cat "${WORKDIR}/dpkg.args")" "tailscale.deb" "The dpkg command should be called with the tailscale.deb file"
 assert_contains "$(cat "${WORKDIR}/sed.args")" "--tun userspace-networking" "The defaults should be updated with userspace networking"
 assert_contains "$(cat "${WORKDIR}/systemctl.args")" "enable tailscaled" "The systemd unit should be enabled"
