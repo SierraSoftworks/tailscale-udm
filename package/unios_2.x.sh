@@ -21,7 +21,7 @@ _tailscale_start() {
     # Run tailscale up to configure
     echo "Running tailscale up to configure interface..."
     # shellcheck disable=SC2086
-    timeout 5 $TAILSCALE up $TAILSCALE_FLAGS
+    timeout 5 $TAILSCALE up
 }
 
 _tailscale_stop() {
@@ -42,16 +42,32 @@ _tailscale_install() {
     }
 
     echo "Installing Tailscale ${VERSION}..."
-    dpkg -i "${TAILSCALE_DEB}"
+    dpkg -i "${TAILSCALE_DEB}" || {
+        echo "Failed to install Tailscale v${VERSION} from ${TAILSCALE_DEB}"
+        echo "Please make sure that you're using a valid version number and try again."
+        exit 1
+    }
 
     echo "Configuring Tailscale to use userspace networking..."
-    sed -i 's/FLAGS=""/FLAGS="--tun userspace-networking/"/' /etc/default/tailscaled
+    sed -i 's/FLAGS=""/FLAGS="--tun userspace-networking/"/' /etc/default/tailscaled || {
+        echo "Failed to configure Tailscale to use userspace networking"
+        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--tun userspace-networking\"."
+        exit 1
+    }
 
     echo "Restarting Tailscale daemon to detect new configuration..."
-    systemctl restart tailscaled
+    systemctl restart tailscaled || {
+        echo "Failed to restart Tailscale daemon"
+        echo "The daemon might not be running with userspace networking enabled, you can restart it manually using 'systemctl restart tailscaled'."
+        exit 1
+    }
 
     echo "Enabling Tailscale to start on boot..."
-    systemctl enable tailscaled
+    systemctl enable tailscaled || {
+        echo "Failed to enable Tailscale to start on boot"
+        echo "You can enable it manually using 'systemctl enable tailscaled'."
+        exit 1
+    }
   
     echo "Installation complete, run '$0 start' to start Tailscale"
 }

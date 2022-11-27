@@ -16,7 +16,33 @@ export OS_VERSION="v2"
 export PATH="${WORKDIR}:${PATH}"
 mock "${WORKDIR}/dpkg" "--## dpkg mock: \$* ##--"
 mock "${WORKDIR}/sed" "--## sed mock: \$* ##--"
-mock "${WORKDIR}/systemctl" "--## systemctl mock: \$* ##--"
+
+# systemctl mock, used to ensure the installer doesn't block thinking that tailscale is running
+cat > "${WORKDIR}/systemctl" <<EOF
+#!/usr/bin/env bash
+
+case "\$1" in
+    "is-active")
+        echo "--## systemctl is-active ##--"
+        exit 1
+        ;;
+    "is-enabled")
+        echo "--## systemctl is-enabled ##--"
+        exit 1
+        ;;
+    "enable")
+        echo "--## systemctl enable ##--"
+        ;;
+    "restart")
+        echo "--## systemctl restart ##--"
+        ;;
+    *)
+        echo "Unexpected command: \${1}"
+        exit 1
+        ;;
+esac
+EOF
+chmod +x "${WORKDIR}/systemctl"
 
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
 
