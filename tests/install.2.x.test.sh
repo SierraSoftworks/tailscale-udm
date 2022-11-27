@@ -32,9 +32,11 @@ case "\$1" in
         ;;
     "enable")
         echo "--## systemctl enable ##--"
+        touch "${WORKDIR}/tailscaled.enabled"
         ;;
     "restart")
         echo "--## systemctl restart ##--"
+        touch "${WORKDIR}/tailscaled.restarted"
         ;;
     *)
         echo "Unexpected command: \${1}"
@@ -48,4 +50,5 @@ chmod +x "${WORKDIR}/systemctl"
 
 assert_contains "$(cat "${WORKDIR}/dpkg.args")" "tailscale.deb" "The dpkg command should be called with the tailscale.deb file"
 assert_contains "$(cat "${WORKDIR}/sed.args")" "--tun userspace-networking" "The defaults should be updated with userspace networking"
-assert_contains "$(cat "${WORKDIR}/systemctl.args")" "enable tailscaled" "The systemd unit should be enabled"
+[[ -f "${WORKDIR}/tailscaled.restarted" ]]; assert "tailscaled should have been restarted"
+[[ -f "${WORKDIR}/tailscaled.enabled" ]]; assert "tailscaled unit should be enabled"
