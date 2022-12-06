@@ -91,6 +91,12 @@ tailscale_has_update() {
   fi
 }
 
+tailscale_update() {
+  tailscale_stop
+  tailscale_install "$1"
+  tailscale_start
+}
+
 case $1 in
   "status")
     if [ -e "${TAILSCALED_SOCK}" ]; then
@@ -136,9 +142,7 @@ case $1 in
     ;;
   "update!")
     if tailscale_has_update "$2"; then
-      tailscale_stop
-      tailscale_install "$2"
-      tailscale_start
+      tailscale_update $2
     else
       echo "Tailscale is already up to date"
     fi
