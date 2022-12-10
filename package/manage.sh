@@ -142,7 +142,7 @@ case $1 in
     ;;
   "update!")
     if tailscale_has_update "$2"; then
-      tailscale_update $2
+      tailscale_update "$2"
     else
       echo "Tailscale is already up to date"
     fi
