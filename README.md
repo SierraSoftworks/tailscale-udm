@@ -65,6 +65,11 @@ To remove Tailscale, you can run the following command, or run the steps below m
 
 ## UniFi OS 2.x/3.x (UDR/UDM SE)
 **⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+
+**NOTE**: UniFi OS 2.x+ support is currently in beta for this project, if you encounter any issues
+please open an issue and we'll do our best to help you out. Logs and clear descriptions of the
+steps you took prior to the issue occurring help immensely.
+
 ### Installation
 
 1. Run the `install.sh` script to install the latest version of the 
