@@ -12,7 +12,8 @@ export PACKAGE_ROOT="${ROOT}/package"
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 
-mock "/usr/bin/ubnt-device-info" "1.0.0"
+export PATH="${WORKDIR}:${PATH}"
+mock "${WORKDIR}/ubnt-device-info" "1.0.0"
 
 # Setup a mock tailscale binary which responds in a predictable way
 tee "${WORKDIR}/tailscale" >/dev/null <<EOF

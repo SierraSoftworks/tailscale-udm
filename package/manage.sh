@@ -2,7 +2,7 @@
 set -e
 
 PACKAGE_ROOT="${PACKAGE_ROOT:-"$(dirname -- "$(readlink -f -- "$0";)")"}"
-OS_VERSION="${FW_VERSION:-$(/usr/bin/ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
+OS_VERSION="${FW_VERSION:-$(ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
 
 if [ "$OS_VERSION" = '1' ]; then
   # shellcheck source=package/unios_1.x.sh

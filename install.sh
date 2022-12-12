@@ -18,7 +18,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 # Download the Tailscale-UDM package
 curl -sSLf --ipv4 -o "${WORKDIR}/tailscale.tgz" "$PACKAGE_URL"
 
-OS_VERSION="${FW_VERSION:-$(/usr/bin/ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
+OS_VERSION="${FW_VERSION:-$(ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
 
 if [ "$OS_VERSION" = '1' ]; then
   export PACKAGE_ROOT="/mnt/data/tailscale"
