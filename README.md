@@ -5,6 +5,10 @@ It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https:
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
 ## Installation
+
+### UniFi OS 1.x
+**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+
 1. Follow the steps to install the boostchicken `on-boot-script` [here](https://github.com/boostchicken-dev/udm-utilities/tree/master/on-boot-script).
 
    ⚠ Make sure that you exit the `unifi-os` shell before moving onto step 2 (or you won't be able to find the `/mnt/data` directory).
@@ -19,8 +23,26 @@ to provide a persistent service and runs using Tailscale's usermode networking f
 3. Follow the on-screen steps to configure `tailscale` and connect it to your network.
 4. Confirm that `tailscale` is working by running `/mnt/data/tailscale/tailscale status`
 
+
+### UniFi OS 2.x/3.x
+**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+
+1. Run the `install.sh` script to install the latest version of the 
+   Tailscale UDM package on your UDM.
+   
+   ```sh
+   # Install the latest version of Tailscale UDM
+   curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
+   ```
+2. Follow the on-screen steps to configure `tailscale` and connect it to your network.
+3. Confirm that `tailscale` is working by running `/data/tailscale/tailscale status`
+
 ## Management
-### Configuring Tailscale
+
+### UniFi OS 1.x
+**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+
+#### Configuring Tailscale
 You can configure Tailscale using all the normal `tailscale up` options, you'll find the binary at
 `/mnt/data/tailscale/tailscale`. *Unfortunately we can't make changes to your `$PATH` to expose the
 normal `tailscale` command, so you'll need to specify the full path when calling it.*
@@ -29,7 +51,7 @@ normal `tailscale` command, so you'll need to specify the full path when calling
 /mnt/data/tailscale/tailscale up --advertise-routes=10.0.0.0/24 --advertise-exit-node --advertise-tags=tag:it
 ```
 
-### Restarting Tailscale
+#### Restarting Tailscale
 The `manage.sh` script takes care of installing, starting, stopping, updating, and uninstalling Tailscale.
 Run it without any arguments to see the options.
 
@@ -37,23 +59,65 @@ Run it without any arguments to see the options.
 /mnt/data/tailscale/manage.sh restart
 ```
 
-### Upgrading Tailscale
+#### Upgrading Tailscale
 ```sh
 /mnt/data/tailscale/manage.sh update
+
+# Or, if you are connected over Tailscale and want to run the update anyway
+nohup /mnt/data/tailscale/manage.sh update!
 ```
 
-### Remove Tailscale
+#### Remove Tailscale
 To remove Tailscale, you can run the following command, or run the steps below manually.
    
 ```sh
 /mnt/data/tailscale/manage.sh uninstall
 ```
 
-#### Manual Steps
+##### Manual Steps
 1. Kill the `tailscaled` daemon with `killall tailscaled`.
 2. Remove the boot script using `rm /mnt/data/on_boot.d/10-tailscaled.sh`
 3. Have tailscale cleanup after itself using `/mnt/data/tailscale/tailscaled --cleanup`.
 4. Remove the tailscale binaries and state using `rm -Rf /mnt/data/tailscale`.
+
+### UniFi OS 2.x/3.x
+**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+
+#### Configuring Tailscale
+You can configure Tailscale using all the normal `tailscale up` options, you should be able to
+find `tailscale` on your path after installation.
+
+```sh
+tailscale up --advertise-routes=10.0.0.0/24 --advertise-exit-node --advertise-tags=tag:it
+```
+
+#### Restarting Tailscale
+The `manage.sh` script takes care of installing, starting, stopping, updating, and uninstalling Tailscale.
+Run it without any arguments to see the options.
+
+```sh
+/data/tailscale/manage.sh restart
+```
+
+#### Upgrading Tailscale
+```sh
+/data/tailscale/manage.sh update
+
+# Or, if you are connected over Tailscale and want to run the update anyway
+nohup /data/tailscale/manage.sh update!
+```
+
+#### Remove Tailscale
+To remove Tailscale, you can run the following command, or run the steps below manually.
+   
+```sh
+/data/tailscale/manage.sh uninstall
+```
+
+##### Manual Steps
+1. Kill the `tailscaled` daemon with `systemctl stop tailscaled`.
+2. Remove the `tailscale` package using `dpkg -P tailscale`.
+3. Remove the management script and state using `rm -Rf /data/tailscale`.
 
 ## Contributing
 There are clearly lots of folks who are interested in running Tailscale on their UDMs. If
