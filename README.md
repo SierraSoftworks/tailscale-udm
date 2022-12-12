@@ -20,8 +20,9 @@ to provide a persistent service and runs using Tailscale's usermode networking f
    # Install the latest version of Tailscale UDM
    curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
    ```
-3. Follow the on-screen steps to configure `tailscale` and connect it to your network.
-4. Confirm that Tailscale is working by running `/mnt/data/tailscale/tailscale status`
+3. Start Tailscale using `/mnt/data/tailscale/tailscale up`.
+4. Follow the on-screen steps to configure `tailscale` and connect it to your network.
+5. Confirm that Tailscale is working by running `/mnt/data/tailscale/tailscale status`
 
 ### Management
 #### Configuring Tailscale
