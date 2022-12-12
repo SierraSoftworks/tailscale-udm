@@ -8,8 +8,12 @@ trap 'rm -rf ${WORKDIR}' EXIT
 # shellcheck source=tests/helpers.sh
 . "${ROOT}/tests/helpers.sh"
 
+export PACKAGE_ROOT="${ROOT}/package"
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
+
+export PATH="${WORKDIR}:${PATH}"
+mock "${WORKDIR}/ubnt-device-info" "1.0.0"
 
 # Setup a mock tailscale binary which responds in a predictable way
 tee "${WORKDIR}/tailscale" >/dev/null <<EOF

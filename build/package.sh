@@ -10,9 +10,10 @@ echo "Preparing temporary build directory"
 mkdir -p "${WORKDIR}/tailscale" "${WORKDIR}/on_boot.d"
 cp "${SOURCE}/package/on-boot.sh" "${WORKDIR}/on_boot.d/10-tailscaled.sh"
 cp "${SOURCE}/package/manage.sh" "${WORKDIR}/tailscale/manage.sh"
+cp "${SOURCE}/package/unios_"*".sh" "${WORKDIR}/tailscale/"
 cp "${SOURCE}/package/tailscale-env" "${WORKDIR}/tailscale/tailscale-env"
 cp "${SOURCE}/LICENSE" "${WORKDIR}/tailscale/LICENSE"
 
 echo "Building tailscale-udm package"
 mkdir -p "${DEST}"
-tar czf "${DEST}/tailscale-udm.tgz" -C "${WORKDIR}" tailscale on_boot.d
+tar czf "${DEST}/tailscale-udm.tgz" -C "${WORKDIR}" tailscale on_boot.d --owner=0 --group=0

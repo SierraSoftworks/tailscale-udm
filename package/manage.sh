@@ -1,84 +1,53 @@
 #!/bin/sh
 set -e
 
-TAILSCALE_ROOT="${TAILSCALE_ROOT:-/mnt/data/tailscale}"
-TAILSCALE="${TAILSCALE_ROOT}/tailscale"
-TAILSCALED="${TAILSCALE_ROOT}/tailscaled"
-TAILSCALED_SOCK="${TAILSCALED_SOCK:-/var/run/tailscale/tailscaled.sock}"
+PACKAGE_ROOT="${PACKAGE_ROOT:-"$(dirname -- "$(readlink -f -- "$0";)")"}"
+OS_VERSION="${FW_VERSION:-$(ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
+
+if [ "$OS_VERSION" = '1' ]; then
+  # shellcheck source=package/unios_1.x.sh
+  . "$PACKAGE_ROOT/unios_1.x.sh"
+elif [ "$OS_VERSION" = '2' ] || [ "$OS_VERSION" = '3' ]; then
+  # shellcheck source=package/unios_2.x.sh
+  . "$PACKAGE_ROOT/unios_2.x.sh"
+else
+  echo "Unsupported UniFi OS version (v$OS_VERSION)."
+  echo "Please provide the following information to us on GitHub:"
+  echo "# /usr/bin/ubnt-device-info firmware_detail"
+  /usr/bin/ubnt-device-info firmware_detail
+  echo ""
+  echo "# /etc/os-release"
+  cat /etc/os-release
+  exit 1
+fi
+
+tailscale_status() {
+  if _tailscale_is_running; then
+    echo "Tailscaled is running"
+    $TAILSCALE --version
+  else
+    echo "Tailscaled is not running"
+  fi
+}
 
 tailscale_start() {
-  # shellcheck source=package/tailscale-env
-  . "${TAILSCALE_ROOT}/tailscale-env"
-
-  PORT="${PORT:-41641}"
-  TAILSCALE_FLAGS="${TAILSCALE_FLAGS:-""}"
-  TAILSCALED_FLAGS="${TAILSCALED_FLAGS:-"--tun userspace-networking"}"
-  LOG_FILE="${TAILSCALE_ROOT}/tailscaled.log"
-
-  if [ -e "${TAILSCALED_SOCK}" ]; then
-    echo "Tailscaled is already running"
-  else
-    echo "Starting Tailscaled..."
-    $TAILSCALED --cleanup > "${LOG_FILE}" 2>&1
-
-    # shellcheck disable=SC2086
-    setsid $TAILSCALED \
-      --state "${TAILSCALE_ROOT}/tailscaled.state" \
-      --socket "${TAILSCALED_SOCK}" \
-      --port "${PORT}" \
-      ${TAILSCALED_FLAGS} >> "${LOG_FILE}" 2>&1 &
-
-    # Wait a few seconds for the daemon to start
-    sleep 5
-
-    if [ -e "${TAILSCALED_SOCK}" ]; then
-      echo "Tailscaled started successfully"
-    else
-      echo "Tailscaled failed to start"
-      exit 1
-    fi
-
-    # Run tailscale up to configure
-    echo "Running tailscale up to configure interface..."
-    # shellcheck disable=SC2086
-    timeout 5 $TAILSCALE up $TAILSCALE_FLAGS
-  fi
+  _tailscale_start
 }
 
 tailscale_stop() {
   echo "Stopping Tailscale..."
-  $TAILSCALE down || true
-
-  killall tailscaled 2>/dev/null || true
-
-  $TAILSCALED --cleanup
+  _tailscale_stop
 }
 
 tailscale_install() {
-  VERSION="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
-  WORKDIR="$(mktemp -d || exit 1)"
-  trap 'rm -rf ${WORKDIR}' EXIT
-  TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
-
-  echo "Installing Tailscale v${VERSION} in ${TAILSCALE_ROOT}..."
-  curl -sSLf --ipv4 -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz" || {
-    echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
-    echo "Please make sure that you're using a valid version number and try again."
-    exit 1
-  }
-  
-  tar xzf "${TAILSCALE_TGZ}" -C "${WORKDIR}"
-  mkdir -p "${TAILSCALE_ROOT}"
-  cp -R "${WORKDIR}/tailscale_${VERSION}_arm64"/* "${TAILSCALE_ROOT}"
+  _tailscale_install "$1"
   
   echo "Installation complete, run '$0 start' to start Tailscale"
 }
 
 tailscale_uninstall() {
   echo "Removing Tailscale"
-  $TAILSCALED --cleanup
-  rm -rf /mnt/data/tailscale
-  rm -f /mnt/data/on_boot.d/10-tailscaled.sh
+  _tailscale_uninstall
 }
 
 tailscale_has_update() {
@@ -99,12 +68,7 @@ tailscale_update() {
 
 case $1 in
   "status")
-    if [ -e "${TAILSCALED_SOCK}" ]; then
-      echo "Tailscaled is running"
-      $TAILSCALE --version
-    else
-      echo "Tailscaled is not running"
-    fi
+    tailscale_status
     ;;
   "start")
     tailscale_start
@@ -117,7 +81,7 @@ case $1 in
     tailscale_start
     ;;
   "install")
-    if [ -e "${TAILSCALE}" ]; then
+    if _tailscale_is_running; then
       echo "Tailscale is already installed, if you wish to update it, run '$0 update'"
       exit 0
     fi
@@ -130,7 +94,7 @@ case $1 in
     ;;
   "update")
     if tailscale_has_update "$2"; then
-      if [ -e "${TAILSCALED_SOCK}" ]; then
+      if _tailscale_is_running; then
         echo "Tailscaled is running, please stop it before updating"
         exit 1
       fi
