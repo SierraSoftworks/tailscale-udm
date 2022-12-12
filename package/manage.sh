@@ -7,10 +7,7 @@ OS_VERSION="${FW_VERSION:-$(/usr/bin/ubnt-device-info firmware_detail | grep -oE
 if [ "$OS_VERSION" = '1' ]; then
   # shellcheck source=package/unios_1.x.sh
   . "$PACKAGE_ROOT/unios_1.x.sh"
-elif [ "$OS_VERSION" = '2' ]; then
-  # shellcheck source=package/unios_2.x.sh
-  . "$PACKAGE_ROOT/unios_2.x.sh"
-elif [ "$OS_VERSION" = '3' ]; then
+elif [ "$OS_VERSION" = '2' ] || [ "$OS_VERSION" = '3' ]; then
   # shellcheck source=package/unios_2.x.sh
   . "$PACKAGE_ROOT/unios_2.x.sh"
 else
