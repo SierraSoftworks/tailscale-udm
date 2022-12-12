@@ -16,4 +16,4 @@ cp "${SOURCE}/LICENSE" "${WORKDIR}/tailscale/LICENSE"
 
 echo "Building tailscale-udm package"
 mkdir -p "${DEST}"
-tar czf "${DEST}/tailscale-udm.tgz" -C "${WORKDIR}" tailscale on_boot.d
+tar czf "${DEST}/tailscale-udm.tgz" -C "${WORKDIR}" tailscale on_boot.d --owner=0 --group=0
