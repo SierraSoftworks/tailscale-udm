@@ -5,7 +5,7 @@ It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https:
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
 ## UniFi OS 1.x (UDM/UDM Pro)
-**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+**ⓘ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
 
 ### Installation
 
@@ -64,7 +64,7 @@ To remove Tailscale, you can run the following command, or run the steps below m
 4. Remove the tailscale binaries and state using `rm -Rf /mnt/data/tailscale`.
 
 ## UniFi OS 2.x/3.x (UDR/UDM SE)
-**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+**ⓘ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
 
 **NOTE**: UniFi OS 2.x+ support is currently in beta for this project, if you encounter any issues
 please open an issue and we'll do our best to help you out. Logs and clear descriptions of the
