@@ -18,13 +18,21 @@ trap 'rm -rf ${WORKDIR}' EXIT
 # Download the Tailscale-UDM package
 curl -sSLf --ipv4 -o "${WORKDIR}/tailscale.tgz" "$PACKAGE_URL"
 
+OS_VERSION="${FW_VERSION:-$(/usr/bin/ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
+
+if [ "$OS_VERSION" = '1' ]; then
+  export PACKAGE_ROOT="/mnt/data/tailscale"
+else
+  export PACKAGE_ROOT="/data/tailscale"
+fi
+
 # Extract the package
-tar xzf "${WORKDIR}/tailscale.tgz" -C "/mnt/data/"
+tar xzf "${WORKDIR}/tailscale.tgz" -C "$(dirname -- "${PACKAGE_ROOT}")"
 
 # Run the setup script to ensure that Tailscale is installed
 # shellcheck source=package/manage.sh
-/mnt/data/tailscale/manage.sh install "${TAILSCALE_VERSION}"
+"$PACKAGE_ROOT/manage.sh" install "${TAILSCALE_VERSION}"
 
 # Start the tailscaled daemon
 # shellcheck source=package/manage.sh
-/mnt/data/tailscale/manage.sh start
+"$PACKAGE_ROOT/manage.sh" start
