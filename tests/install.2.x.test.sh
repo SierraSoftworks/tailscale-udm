@@ -16,6 +16,7 @@ export OS_VERSION="v2"
 export PATH="${WORKDIR}:${PATH}"
 mock "${WORKDIR}/dpkg" "--## dpkg mock: \$* ##--"
 mock "${WORKDIR}/sed" "--## sed mock: \$* ##--"
+mock "/usr/bin/ubnt-device-info" "2.0.0"
 
 # systemctl mock, used to ensure the installer doesn't block thinking that tailscale is running
 cat > "${WORKDIR}/systemctl" <<EOF

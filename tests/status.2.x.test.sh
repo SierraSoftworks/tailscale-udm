@@ -11,7 +11,8 @@ trap 'rm -rf ${WORKDIR}' EXIT
 export PACKAGE_ROOT="${ROOT}/package"
 export TAILSCALE_ROOT="${WORKDIR}"
 export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
-export OS_VERSION="v2"
+
+mock "/usr/bin/ubnt-device-info" "1.0.0"
 
 export PATH="${WORKDIR}:${PATH}"
 mock "${WORKDIR}/tailscale" "0.0.0"
