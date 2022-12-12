@@ -1,13 +1,13 @@
 # Tailscale on Unifi Dream Machine
 This repo contains the scripts necessary to install and run a [tailscale](https://tailscale.com)
-instance on your [Unifi Dream Machine](https://unifi-network.ui.com/dreammachine) (UDM/UDM Pro).
+instance on your [Unifi Dream Machine](https://unifi-network.ui.com/dreammachine) (UDM/UDM Pro/UDR/UDM-SE).
 It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https://github.com/boostchicken/udm-utilities)
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
-## Installation
-
-### UniFi OS 1.x
+## UniFi OS 1.x (UDM/UDM Pro)
 **⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+
+### Installation
 
 1. Follow the steps to install the boostchicken `on-boot-script` [here](https://github.com/boostchicken-dev/udm-utilities/tree/master/on-boot-script).
 
@@ -21,27 +21,9 @@ to provide a persistent service and runs using Tailscale's usermode networking f
    curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
    ```
 3. Follow the on-screen steps to configure `tailscale` and connect it to your network.
-4. Confirm that `tailscale` is working by running `/mnt/data/tailscale/tailscale status`
+4. Confirm that Tailscale is working by running `/mnt/data/tailscale/tailscale status`
 
-
-### UniFi OS 2.x/3.x
-**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
-
-1. Run the `install.sh` script to install the latest version of the 
-   Tailscale UDM package on your UDM.
-   
-   ```sh
-   # Install the latest version of Tailscale UDM
-   curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
-   ```
-2. Follow the on-screen steps to configure `tailscale` and connect it to your network.
-3. Confirm that `tailscale` is working by running `/data/tailscale/tailscale status`
-
-## Management
-
-### UniFi OS 1.x
-**⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
-
+### Management
 #### Configuring Tailscale
 You can configure Tailscale using all the normal `tailscale up` options, you'll find the binary at
 `/mnt/data/tailscale/tailscale`. *Unfortunately we can't make changes to your `$PATH` to expose the
@@ -80,9 +62,22 @@ To remove Tailscale, you can run the following command, or run the steps below m
 3. Have tailscale cleanup after itself using `/mnt/data/tailscale/tailscaled --cleanup`.
 4. Remove the tailscale binaries and state using `rm -Rf /mnt/data/tailscale`.
 
-### UniFi OS 2.x/3.x
+## UniFi OS 2.x/3.x (UDR/UDM SE)
 **⚠ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
+### Installation
 
+1. Run the `install.sh` script to install the latest version of the 
+   Tailscale UDM package on your UDM.
+   
+   ```sh
+   # Install the latest version of Tailscale UDM
+   curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
+   ```
+2. Run `tailscale up` to start Tailscale.
+3. Follow the on-screen steps to configure Tailscale and connect it to your network.
+4. Confirm that Tailscale is working by running `tailscale status`
+
+### Management
 #### Configuring Tailscale
 You can configure Tailscale using all the normal `tailscale up` options, you should be able to
 find `tailscale` on your path after installation.
@@ -132,7 +127,12 @@ just remember to provide the full path to the `tailscale` binary when doing so.
 
 ```sh
 # Specify the routes you'd like to advertise using their CIDR notation
+
+# UniFi OS 1.x
 /mnt/data/tailscale/tailscale up --advertise-routes="10.0.0.0/24,192.168.0.0/24"
+
+# UniFi OS 2.x/3.x
+tailscale up --advertise-routes="10.0.0.0/24,192.168.0.0/24"
 ```
 
 ### Can I route traffic from machines on my local network to Tailscale endpoints automatically?
@@ -150,9 +150,17 @@ to enable it. You'll need to setup SSH ACLs in your account by following
 [this guide](https://tailscale.com/kb/1193/tailscale-ssh/).
 
 ```sh
+# UniFi OS 1.x
 # Update Tailscale to its latest version
 /mnt/data/tailscale/manage.sh update!
 
 # Enable SSH advertisment through Tailscale
 /mnt/data/tailscale/tailscale up --ssh
+
+# UniFi OS 2.x/3.x
+# Update Tailscale to its latest version
+/data/tailscale/manage.sh update!
+
+# Enable SSH advertisment through Tailscale
+tailscale up --ssh
 ```
