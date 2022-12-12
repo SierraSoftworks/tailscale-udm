@@ -1,18 +1,24 @@
 #!/bin/sh
 set -e
 
-OS_VERSION="${OS_VERSION:-$(grep 'VERSION_ID=' /etc/os-release | grep -oE 'v[^.]+')}"
 PACKAGE_ROOT="${PACKAGE_ROOT:-"$(dirname -- "$(readlink -f -- "$0";)")"}"
+OS_VERSION="${FW_VERSION:-$(/usr/bin/ubnt-device-info firmware_detail | grep -oE '^[0-9]+')}"
 
-if [ "$OS_VERSION" = 'v1' ]; then
+if [ "$OS_VERSION" = '1' ]; then
   # shellcheck source=package/unios_1.x.sh
   . "$PACKAGE_ROOT/unios_1.x.sh"
-elif [ "$OS_VERSION" = 'v2' ]; then
+elif [ "$OS_VERSION" = '2' ]; then
+  # shellcheck source=package/unios_2.x.sh
+  . "$PACKAGE_ROOT/unios_2.x.sh"
+elif [ "$OS_VERSION" = '3' ]; then
   # shellcheck source=package/unios_2.x.sh
   . "$PACKAGE_ROOT/unios_2.x.sh"
 else
-  echo "Unsupported UniFi OS version ($OS_VERSION)."
+  echo "Unsupported UniFi OS version (v$OS_VERSION)."
   echo "Please provide the following information to us on GitHub:"
+  echo "# /usr/bin/ubnt-device-info firmware_detail"
+  /usr/bin/ubnt-device-info firmware_detail
+  echo ""
   echo "# /etc/os-release"
   cat /etc/os-release
   exit 1
