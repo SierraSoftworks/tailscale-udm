@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-PACKAGE_ROOT="${PACKAGE_ROOT:-/mnt/data/tailscale}"
 OS_VERSION="${OS_VERSION:-$(grep 'VERSION_ID=' /etc/os-release | grep -oE 'v[^.]+')}"
+PACKAGE_ROOT="${PACKAGE_ROOT:-"$(dirname -- "$(readlink -f -- "$0";)")"}"
 
 if [ "$OS_VERSION" = 'v1' ]; then
   # shellcheck source=package/unios_1.x.sh
