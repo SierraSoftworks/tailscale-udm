@@ -43,7 +43,7 @@ _tailscale_install() {
     }
 
     echo "Installing Tailscale ${VERSION}..."
-    dpkg -i "${TAILSCALE_DEB}" || {
+    dpkg --force-confold -i "${TAILSCALE_DEB}" || {
         echo "Failed to install Tailscale v${VERSION} from ${TAILSCALE_DEB}"
         echo "Please make sure that you're using a valid version number and try again."
         exit 1
