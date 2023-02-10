@@ -37,8 +37,8 @@ _tailscale_install() {
         . /etc/os-release
 
         echo "Installing Tailscale package repository..."
-        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.gpg" | sudo apt-key add -
-        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.list" | tee /etc/apt/sources.list.d/tailscale.list
     fi
 
     echo "Updating package lists..."

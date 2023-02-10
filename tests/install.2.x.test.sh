@@ -14,6 +14,8 @@ export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 export OS_VERSION="v2"
 
 export PATH="${WORKDIR}:${PATH}"
+mock "${WORKDIR}/apt-key" "--## apt-key mock: \$* ##--"
+mock "${WORKDIR}/tee" "--## tee mock: \$* ##--"
 mock "${WORKDIR}/apt" "--## apt mock: \$* ##--"
 mock "${WORKDIR}/sed" "--## sed mock: \$* ##--"
 mock "${WORKDIR}/ubnt-device-info" "2.0.0"
