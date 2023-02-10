@@ -93,14 +93,23 @@ tailscale up --advertise-routes=10.0.0.0/24 --advertise-exit-node --advertise-ta
 ```
 
 #### Restarting Tailscale
-The `manage.sh` script takes care of installing, starting, stopping, updating, and uninstalling Tailscale.
-Run it without any arguments to see the options.
+On UniFi OS 2.x+, Tailscale is managed using `systemd` and the `tailscaled` service. You can
+restart it using the following command.
 
 ```sh
-/data/tailscale/manage.sh restart
+systemctl restart tailscaled
 ```
 
 #### Upgrading Tailscale
+Upgrading Tailscale on UniFi OS 2.x+ can be done either using `apt` or by using the `manage.sh`
+helper script.
+
+##### Using `apt`
+```sh
+apt update && apt upgrade -y tailscale
+```
+
+##### Using `manage.sh`
 ```sh
 /data/tailscale/manage.sh update
 
