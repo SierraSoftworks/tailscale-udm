@@ -48,9 +48,9 @@ _tailscale_install() {
     apt install -y tailscale="${VERSION}"
 
     echo "Configuring Tailscale to use userspace networking..."
-    sed -i 's/FLAGS=""/FLAGS="--tun userspace-networking"/' /etc/default/tailscaled || {
+    sed -i 's/FLAGS=""/FLAGS="--state /data/tailscale/tailscaled.state --tun userspace-networking"/' /etc/default/tailscaled || {
         echo "Failed to configure Tailscale to use userspace networking"
-        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--tun userspace-networking\"."
+        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--state /data/tailscale/tailscale.state --tun userspace-networking\"."
         exit 1
     }
 
