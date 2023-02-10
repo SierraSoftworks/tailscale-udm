@@ -31,23 +31,21 @@ _tailscale_stop() {
 
 _tailscale_install() {
     VERSION="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
-    WORKDIR="$(mktemp -d || exit 1)"
-    trap 'rm -rf ${WORKDIR}' EXIT
-    TAILSCALE_DEB="${WORKDIR}/tailscale.deb"
 
-    echo "Downloading Tailscale ${VERSION}..."
-    curl -sSLf --ipv4 -o "${TAILSCALE_DEB}" "https://pkgs.tailscale.com/stable/debian/pool/tailscale_${VERSION}_arm64.deb" || {
-        echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/stable/debian/pool/tailscale_${VERSION}_arm64.deb"
-        echo "Please make sure that you're using a valid version number and try again."
-        exit 1
-    }
+    if [ ! -f "/etc/apt/sources.list.d/tailscale.list" ]; then
+        # shellcheck source=tests/os-release
+        . /etc/os-release
+
+        echo "Installing Tailscale package repository..."
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.list" | tee /etc/apt/sources.list.d/tailscale.list
+    fi
+
+    echo "Updating package lists..."
+    apt update
 
     echo "Installing Tailscale ${VERSION}..."
-    dpkg --force-confold -i "${TAILSCALE_DEB}" || {
-        echo "Failed to install Tailscale v${VERSION} from ${TAILSCALE_DEB}"
-        echo "Please make sure that you're using a valid version number and try again."
-        exit 1
-    }
+    apt install -y tailscale="${VERSION}"
 
     echo "Configuring Tailscale to use userspace networking..."
     sed -i 's/FLAGS=""/FLAGS="--tun userspace-networking"/' /etc/default/tailscaled || {
@@ -74,5 +72,6 @@ _tailscale_install() {
 }
 
 _tailscale_uninstall() {
-    dpkg -P tailscale
+    apt remove tailscale
+    rm -f /etc/apt/sources.list.d/tailscale.list || true
 }
