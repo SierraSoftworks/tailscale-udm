@@ -30,7 +30,7 @@ _tailscale_stop() {
 }
 
 _tailscale_install() {
-    VERSION="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
+    tailscale_version="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
 
     if [ ! -f "/etc/apt/sources.list.d/tailscale.list" ]; then
         # shellcheck source=tests/os-release
@@ -44,8 +44,8 @@ _tailscale_install() {
     echo "Updating package lists..."
     apt update
 
-    echo "Installing Tailscale ${VERSION}..."
-    apt install -y tailscale="${VERSION}"
+    echo "Installing Tailscale ${tailscale_version}..."
+    apt install -y tailscale="${tailscale_version}"
 
     echo "Configuring Tailscale to use userspace networking..."
     sed -i 's/FLAGS=""/FLAGS="--state /data/tailscale/tailscaled.state --tun userspace-networking"/' /etc/default/tailscaled || {
