@@ -1,9 +1,6 @@
 #!/bin/sh
-
+export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/data/tailscale}"
 export TAILSCALE="tailscale"
-
-# shellcheck source=package/tailscale-env
-. "/data/tailscale/tailscale-env"
 
 _tailscale_is_running() {
     systemctl is-active --quiet tailscaled
