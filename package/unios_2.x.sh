@@ -1,5 +1,5 @@
 #!/bin/sh
-
+export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/data/tailscale}"
 export TAILSCALE="tailscale"
 
 _tailscale_is_running() {

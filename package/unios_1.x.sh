@@ -5,7 +5,7 @@ export TAILSCALED="${TAILSCALE_ROOT}/tailscaled"
 export TAILSCALED_SOCK="${TAILSCALED_SOCK:-/var/run/tailscale/tailscaled.sock}"
 
 _tailscale_is_running() {
-    if [ -e "${TAILSCALED_SOCK}" ]; then
+  if [ -e "${TAILSCALED_SOCK}" ]; then
     return 0
   else
     return 1
