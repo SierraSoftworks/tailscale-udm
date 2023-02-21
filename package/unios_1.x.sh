@@ -4,8 +4,11 @@ export TAILSCALE="${TAILSCALE_ROOT}/tailscale"
 export TAILSCALED="${TAILSCALE_ROOT}/tailscaled"
 export TAILSCALED_SOCK="${TAILSCALED_SOCK:-/var/run/tailscale/tailscaled.sock}"
 
+# shellcheck source=package/tailscale-env
+. "${TAILSCALE_ROOT}/tailscale-env"
+
 _tailscale_is_running() {
-    if [ -e "${TAILSCALED_SOCK}" ]; then
+  if [ -e "${TAILSCALED_SOCK}" ]; then
     return 0
   else
     return 1
@@ -13,9 +16,6 @@ _tailscale_is_running() {
 }
 
 _tailscale_start() {
-  # shellcheck source=package/tailscale-env
-  . "${TAILSCALE_ROOT}/tailscale-env"
-
   PORT="${PORT:-41641}"
   TAILSCALE_FLAGS="${TAILSCALE_FLAGS:-""}"
   TAILSCALED_FLAGS="${TAILSCALED_FLAGS:-"--tun userspace-networking"}"
