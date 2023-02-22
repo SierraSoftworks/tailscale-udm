@@ -151,9 +151,11 @@ tailscale up --advertise-routes="10.0.0.0/24,192.168.0.0/24"
 ```
 
 ### Can I route traffic from machines on my local network to Tailscale endpoints automatically?
-Currently we are not aware of any supported means of achieving this. Tailscale's
-subnet routing is intended for Tailscale-to-subnet connections and doesn't provide
-explicit support for subnet-to-Tailscale connections.
+In theory, yes - however it does require manual changes to your routing rules and these will need
+to be updated if you take advantage of WAN fail-over. This has been discussed in more detail
+[here](https://github.com/SierraSoftworks/tailscale-udm/discussions/51).
+
+*Note that we do not currently include this in `tailscale-udm` due to the risk of breaking conflicts in future.*
 
 ### Why can't I see a network interface for Tailscale?
 Tailscale runs as a userspace networking component on the UDM rather than as a TUN
