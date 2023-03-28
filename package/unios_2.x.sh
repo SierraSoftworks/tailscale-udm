@@ -59,14 +59,14 @@ _tailscale_install() {
     }
 
     echo "Restarting Tailscale daemon to detect new configuration..."
-    systemctl restart tailscaled || {
+    systemctl restart tailscaled.service || {
         echo "Failed to restart Tailscale daemon"
         echo "The daemon might not be running with userspace networking enabled, you can restart it manually using 'systemctl restart tailscaled'."
         exit 1
     }
 
     echo "Enabling Tailscale to start on boot..."
-    systemctl enable tailscaled || {
+    systemctl enable tailscaled.service || {
         echo "Failed to enable Tailscale to start on boot"
         echo "You can enable it manually using 'systemctl enable tailscaled'."
         exit 1
