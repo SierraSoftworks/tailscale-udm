@@ -22,7 +22,10 @@ else
 fi
 
 tailscale_status() {
-  if _tailscale_is_running; then
+  if ! _tailscale_is_installed; then
+    echo "Tailscale is not installed"
+    exit 1
+  elif _tailscale_is_running; then
     echo "Tailscaled is running"
     $TAILSCALE --version
   else
@@ -112,8 +115,12 @@ case $1 in
     fi
     ;;
   "on-boot")
+    if ! _tailscale_is_installed; then
+      tailscale_install
+    fi
+
     # shellcheck source=package/tailscale-env
-    . "${TAILSCALE_ROOT}/tailscale-env"
+    . "${PACKAGE_ROOT}/tailscale-env"
 
     if [ "${TAILSCALE_AUTOUPDATE}" = "true" ]; then
       tailscale_has_update && tailscale_update || echo "Not updated"

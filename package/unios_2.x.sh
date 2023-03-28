@@ -6,6 +6,10 @@ _tailscale_is_running() {
     systemctl is-active --quiet tailscaled
 }
 
+_tailscale_is_installed() {
+    command -v tailscale >/dev/null 2>&1
+}
+
 _tailscale_start() {
     systemctl start tailscaled
     
@@ -67,7 +71,29 @@ _tailscale_install() {
         echo "You can enable it manually using 'systemctl enable tailscaled'."
         exit 1
     }
-  
+
+    if [ ! -f "/lib/systemd/system/tailscale-install.service" ]; then
+        echo "Installing pre-start script to install Tailscale on firmware updates."
+        cat >/lib/systemd/system/tailscale-install.service <<EOF
+[Unit]
+Description=Ensure that Tailscale is installed on your device
+Before=tailscaled.service
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Restart=no
+ExecStart=/bin/bash /data/tailscale/manage.sh install
+
+[Install]
+WantedBy=tailscaled.service
+EOF
+
+        systemctl daemon-reload
+        systemctl enable tailscale-install.service
+    fi
+
     echo "Installation complete, run '$0 start' to start Tailscale"
 }
 

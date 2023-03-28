@@ -12,6 +12,14 @@ _tailscale_is_running() {
   fi
 }
 
+_tailscale_is_installed() {
+  if [ -e "${TAILSCALE}" ] && [ -e "${TAILSCALED}" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 _tailscale_start() {
   # shellcheck source=package/tailscale-env
   . "${TAILSCALE_ROOT}/tailscale-env"
