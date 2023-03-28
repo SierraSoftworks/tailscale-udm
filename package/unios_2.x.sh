@@ -98,6 +98,9 @@ EOF
 }
 
 _tailscale_uninstall() {
-    apt remove tailscale
+    apt remove -y tailscale
     rm -f /etc/apt/sources.list.d/tailscale.list || true
+
+    systemctl disable tailscale-install.service || true
+    rm -f /lib/systemd/system/tailscale-install.service || true
 }
