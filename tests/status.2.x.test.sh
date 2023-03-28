@@ -15,7 +15,7 @@ export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 export PATH="${WORKDIR}:${PATH}"
 mock "${WORKDIR}/ubnt-device-info" "2.0.0"
 
-assert_eq "$("${ROOT}/package/manage.sh" status)" "Tailscaled is not installed"
+assert_eq "$("${ROOT}/package/manage.sh" status)" "Tailscaled is not installed" "Tailscaled should be reported as not installed"
 
 mock "${WORKDIR}/tailscale" "0.0.0"
 
