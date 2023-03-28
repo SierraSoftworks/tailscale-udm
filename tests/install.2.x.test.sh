@@ -18,6 +18,7 @@ mock "${WORKDIR}/apt-key" "--## apt-key mock: \$* ##--"
 mock "${WORKDIR}/tee" "--## tee mock: \$* ##--"
 mock "${WORKDIR}/apt" "--## apt mock: \$* ##--"
 mock "${WORKDIR}/sed" "--## sed mock: \$* ##--"
+mock "${WORKDIR}/tee" "--## tee mock: \$* ##--"
 mock "${WORKDIR}/ubnt-device-info" "2.0.0"
 
 # systemctl mock, used to ensure the installer doesn't block thinking that tailscale is running

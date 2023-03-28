@@ -74,7 +74,7 @@ _tailscale_install() {
 
     if [ ! -f "/lib/systemd/system/tailscale-install.service" ]; then
         echo "Installing pre-start script to install Tailscale on firmware updates."
-        cat >/lib/systemd/system/tailscale-install.service <<EOF
+        tee /lib/systemd/system/tailscale-install.service >/dev/null <<EOF
 [Unit]
 Description=Ensure that Tailscale is installed on your device
 Before=tailscaled.service
