@@ -85,10 +85,14 @@ case $1 in
     ;;
   "install")
     if _tailscale_is_running; then
-      echo "Tailscale is already installed, if you wish to update it, run '$0 update'"
+      echo "Tailscale is already installed and running, if you wish to update it, run '$0 update'"
+      echo "If you wish to force a reinstall, run '$0 install!'"
       exit 0
     fi
 
+    tailscale_install "$2"
+    ;;
+  "install!")
     tailscale_install "$2"
     ;;
   "uninstall")
