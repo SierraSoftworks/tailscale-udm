@@ -72,23 +72,9 @@ _tailscale_install() {
         exit 1
     }
 
-    if [ ! -f "/lib/systemd/system/tailscale-install.service" ]; then
+    if [ ! -e "/etc/systemd/system/tailscale-install.service" ]; then
         echo "Installing pre-start script to install Tailscale on firmware updates."
-        tee /lib/systemd/system/tailscale-install.service >/dev/null <<EOF
-[Unit]
-Description=Ensure that Tailscale is installed on your device
-Before=tailscaled.service
-After=network.target
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-Restart=no
-ExecStart=/bin/bash /data/tailscale/manage.sh install
-
-[Install]
-WantedBy=tailscaled.service
-EOF
+        ln -s "${TAILSCALE_ROOT}/tailscale-install.service" /etc/systemd/system/tailscale-install.service
 
         systemctl daemon-reload
         systemctl enable tailscale-install.service

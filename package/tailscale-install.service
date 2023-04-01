@@ -1,0 +1,13 @@
+[Unit]
+Description=Ensure that Tailscale is installed on your device
+Before=tailscaled.service
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Restart=no
+ExecStart=/bin/bash /data/tailscale/manage.sh install
+
+[Install]
+WantedBy=tailscaled.service multi-user.target
