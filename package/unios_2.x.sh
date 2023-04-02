@@ -12,7 +12,7 @@ _tailscale_is_installed() {
 
 _tailscale_start() {
     systemctl start tailscaled
-    
+
     # Wait a few seconds for the daemon to start
     sleep 5
 
