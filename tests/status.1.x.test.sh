@@ -14,8 +14,11 @@ export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 
 export PATH="${WORKDIR}:${PATH}"
 mock "${WORKDIR}/ubnt-device-info" "1.0.0"
-mock "${WORKDIR}/tailscale" "0.0.0"
 
+assert_eq "$("${ROOT}/package/manage.sh" status)" "Tailscale is not installed" "Tailscaled should be reported as not installed"
+
+mock "${WORKDIR}/tailscale" "0.0.0"
+mock "${WORKDIR}/tailscaled" "0.0.0"
 assert_eq "$("${ROOT}/package/manage.sh" status)" "Tailscaled is not running" "Tailscaled should be reported as not running"
 
 touch "${TAILSCALED_SOCK}"; assert "The tailscale socket should be created"

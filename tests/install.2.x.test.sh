@@ -18,6 +18,7 @@ mock "${WORKDIR}/apt-key" "--## apt-key mock: \$* ##--"
 mock "${WORKDIR}/tee" "--## tee mock: \$* ##--"
 mock "${WORKDIR}/apt" "--## apt mock: \$* ##--"
 mock "${WORKDIR}/sed" "--## sed mock: \$* ##--"
+mock "${WORKDIR}/ln" "--## ln mock: \$* ##--"
 mock "${WORKDIR}/ubnt-device-info" "2.0.0"
 
 # systemctl mock, used to ensure the installer doesn't block thinking that tailscale is running
@@ -34,8 +35,12 @@ case "\$1" in
         exit 1
         ;;
     "enable")
-        echo "--## systemctl enable ##--"
-        touch "${WORKDIR}/tailscaled.enabled"
+        echo "--## systemctl enable \$2 ##--"
+        touch "${WORKDIR}/\$2.enabled"
+        ;;
+    "daemon-reload")
+        echo "--## systemctl daemon-reload ##--"
+        touch "${WORKDIR}/systemctl.daemon-reload"
         ;;
     "restart")
         echo "--## systemctl restart ##--"
@@ -57,4 +62,6 @@ assert_contains "$(head -n 1 "${WORKDIR}/apt.args")" "update" "The apt command s
 assert_contains "$(head -n 2 "${WORKDIR}/apt.args" | tail -n 1)" "install -y tailscale" "The apt command should be called with the command to install tailscale file"
 assert_contains "$(cat "${WORKDIR}/sed.args")" "--tun userspace-networking" "The defaults should be updated with userspace networking"
 [[ -f "${WORKDIR}/tailscaled.restarted" ]]; assert "tailscaled should have been restarted"
-[[ -f "${WORKDIR}/tailscaled.enabled" ]]; assert "tailscaled unit should be enabled"
+[[ -f "${WORKDIR}/tailscaled.service.enabled" ]]; assert "tailscaled unit should be enabled"
+[[ -f "${WORKDIR}/systemctl.daemon-reload" ]]; assert "systemctl should have been reloaded"
+[[ -f "${WORKDIR}/tailscale-install.service.enabled" ]]; assert "tailscale-install unit should be enabled"

@@ -6,9 +6,13 @@ _tailscale_is_running() {
     systemctl is-active --quiet tailscaled
 }
 
+_tailscale_is_installed() {
+    command -v tailscale >/dev/null 2>&1
+}
+
 _tailscale_start() {
     systemctl start tailscaled
-    
+
     # Wait a few seconds for the daemon to start
     sleep 5
 
@@ -55,23 +59,34 @@ _tailscale_install() {
     }
 
     echo "Restarting Tailscale daemon to detect new configuration..."
-    systemctl restart tailscaled || {
+    systemctl restart tailscaled.service || {
         echo "Failed to restart Tailscale daemon"
         echo "The daemon might not be running with userspace networking enabled, you can restart it manually using 'systemctl restart tailscaled'."
         exit 1
     }
 
     echo "Enabling Tailscale to start on boot..."
-    systemctl enable tailscaled || {
+    systemctl enable tailscaled.service || {
         echo "Failed to enable Tailscale to start on boot"
         echo "You can enable it manually using 'systemctl enable tailscaled'."
         exit 1
     }
-  
+
+    if [ ! -e "/etc/systemd/system/tailscale-install.service" ]; then
+        echo "Installing pre-start script to install Tailscale on firmware updates."
+        ln -s "${TAILSCALE_ROOT}/tailscale-install.service" /etc/systemd/system/tailscale-install.service
+
+        systemctl daemon-reload
+        systemctl enable tailscale-install.service
+    fi
+
     echo "Installation complete, run '$0 start' to start Tailscale"
 }
 
 _tailscale_uninstall() {
-    apt remove tailscale
+    apt remove -y tailscale
     rm -f /etc/apt/sources.list.d/tailscale.list || true
+
+    systemctl disable tailscale-install.service || true
+    rm -f /lib/systemd/system/tailscale-install.service || true
 }
