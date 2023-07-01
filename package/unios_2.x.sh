@@ -36,12 +36,14 @@ _tailscale_stop() {
 _tailscale_install() {
     tailscale_version="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
 
-    if [ ! -f "/etc/apt/sources.list.d/tailscale.list" ]; then
-        # shellcheck source=tests/os-release
-        . /etc/os-release
+    # shellcheck source=tests/os-release
+    . /etc/os-release
 
+    echo "Installing latest Tailscale package repository key..."
+    curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
+
+    if [ ! -f "/etc/apt/sources.list.d/tailscale.list" ]; then
         echo "Installing Tailscale package repository..."
-        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
         curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.list" | tee /etc/apt/sources.list.d/tailscale.list
     fi
 
