@@ -57,6 +57,13 @@ _tailscale_install() {
     # shellcheck source=package/tailscale-env
     . "${TAILSCALE_ROOT}/tailscale-env"
 
+    echo "Configuring Tailscale port..."
+    sed -i "s/PORT=\"[^\"]*\"/PORT=\"${PORT:-41641}\"/" /etc/default/tailscaled || {
+        echo "Failed to configure Tailscale port"
+        echo "Check that the file /etc/default/tailscaled exists and contains the line PORT=\"${PORT:-41641}\"."
+        exit 1
+    }
+
     echo "Configuring Tailscaled startup flags..."
     sed -i "s/FLAGS=\"[^\"]*\"/FLAGS=\"--state \/data\/tailscale\/tailscaled.state ${TAILSCALED_FLAGS}\"/" /etc/default/tailscaled || {
         echo "Failed to configure Tailscaled startup flags"
