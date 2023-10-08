@@ -57,10 +57,10 @@ _tailscale_install() {
     # shellcheck source=package/tailscale-env
     . "$TAILSCALE_ROOT/tailscale-env"
 
-    echo "Configuring Tailscale to use userspace networking..."
+    echo "Configuring Tailscaled startup flags..."
     sed -i "s/FLAGS=""""/FLAGS=""--state \/data\/tailscale\/tailscaled.state ${TAILSCALED_FLAGS}""/" /etc/default/tailscaled || {
-        echo "Failed to configure Tailscale to use userspace networking"
-        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--state /data/tailscale/tailscale.state --tun userspace-networking\"."
+        echo "Failed to configure Tailscaled startup flags"
+        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--state /data/tailscale/tailscale.state ${TAILSCALED_FLAGS}\"."
         exit 1
     }
 
