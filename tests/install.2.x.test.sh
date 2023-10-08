@@ -54,6 +54,8 @@ esac
 EOF
 chmod +x "${WORKDIR}/systemctl"
 
+cp "${PACKAGE_ROOT}/tailscale-env" "${WORKDIR}/tailscale-env"
+
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
 
 cat "${WORKDIR}/apt.args"
