@@ -58,7 +58,7 @@ _tailscale_install() {
     . "$TAILSCALE_ROOT/tailscale-env"
 
     echo "Configuring Tailscaled startup flags..."
-    sed -i "s/FLAGS=""""/FLAGS=""--state \/data\/tailscale\/tailscaled.state ${TAILSCALED_FLAGS}""/" /etc/default/tailscaled || {
+    sed -i "s/FLAGS=""[^""]*""/FLAGS=""--state \/data\/tailscale\/tailscaled.state ${TAILSCALED_FLAGS}""/" /etc/default/tailscaled || {
         echo "Failed to configure Tailscaled startup flags"
         echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--state /data/tailscale/tailscale.state ${TAILSCALED_FLAGS}\"."
         exit 1
