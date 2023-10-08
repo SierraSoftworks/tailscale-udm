@@ -59,6 +59,7 @@ cp "${PACKAGE_ROOT}/tailscale-env" "${WORKDIR}/tailscale-env"
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
 
 cat "${WORKDIR}/apt.args"
+cat "${WORKDIR}/sed.args"
 
 assert_contains "$(head -n 1 "${WORKDIR}/apt.args")" "update" "The apt command should be called to update the package list"
 assert_contains "$(head -n 2 "${WORKDIR}/apt.args" | tail -n 1)" "install -y tailscale" "The apt command should be called with the command to install tailscale file"
