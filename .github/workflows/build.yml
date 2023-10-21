@@ -7,7 +7,7 @@ jobs:
     name: "Package"
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: ./build/package.sh ./ ./dist
       - uses: actions/upload-artifact@v3
         with:
@@ -18,5 +18,5 @@ jobs:
     name: Test
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: ./tests/run.sh
