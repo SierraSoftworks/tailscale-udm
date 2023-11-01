@@ -53,10 +53,21 @@ _tailscale_install() {
     echo "Installing Tailscale ${tailscale_version}..."
     apt install -y tailscale="${tailscale_version}"
 
-    echo "Configuring Tailscale to use userspace networking..."
-    sed -i 's/FLAGS=""/FLAGS="--state \/data\/tailscale\/tailscaled.state --tun userspace-networking"/' /etc/default/tailscaled || {
-        echo "Failed to configure Tailscale to use userspace networking"
-        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--state /data/tailscale/tailscale.state --tun userspace-networking\"."
+    # Load the tailscale-env file to discover the flags which are required to be set
+    # shellcheck source=package/tailscale-env
+    . "${TAILSCALE_ROOT}/tailscale-env"
+
+    echo "Configuring Tailscale port..."
+    sed -i "s/PORT=\"[^\"]*\"/PORT=\"${PORT:-41641}\"/" /etc/default/tailscaled || {
+        echo "Failed to configure Tailscale port"
+        echo "Check that the file /etc/default/tailscaled exists and contains the line PORT=\"${PORT:-41641}\"."
+        exit 1
+    }
+
+    echo "Configuring Tailscaled startup flags..."
+    sed -i "s/FLAGS=\"[^\"]*\"/FLAGS=\"--state \/data\/tailscale\/tailscaled.state ${TAILSCALED_FLAGS}\"/" /etc/default/tailscaled || {
+        echo "Failed to configure Tailscaled startup flags"
+        echo "Check that the file /etc/default/tailscaled exists and contains the line FLAGS=\"--state /data/tailscale/tailscale.state ${TAILSCALED_FLAGS}\"."
         exit 1
     }
 
