@@ -25,8 +25,9 @@ _tailscale_start() {
 
     # Run tailscale up to configure
     echo "Running tailscale up to configure interface..."
+    
     # shellcheck disable=SC2086
-    timeout 5 tailscale up
+    timeout 30 tailscale up || echo "Interface configuration timed out, you may need to run this manually."
 }
 
 _tailscale_stop() {
