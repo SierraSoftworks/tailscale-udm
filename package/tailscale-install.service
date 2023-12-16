@@ -7,9 +7,6 @@ Type=oneshot
 RemainAfterExit=yes
 Restart=no
 Environment=DEBIAN_FRONTEND=noninteractive
-
-# Wait 30 seconds after booting before attempting to install Tailscale 
-ExecStartPre=/bin/bash -c 'sleep 30'
 ExecStart=/bin/bash /data/tailscale/manage.sh on-boot
 
 [Install]
