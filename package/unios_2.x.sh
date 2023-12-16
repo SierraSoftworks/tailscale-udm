@@ -25,7 +25,7 @@ _tailscale_start() {
 
     # Run tailscale up to configure
     echo "Running tailscale up to configure interface..."
-    
+
     # shellcheck disable=SC2086
     timeout 30 tailscale up || echo "Interface configuration timed out, you may need to run this manually."
 }
@@ -35,17 +35,21 @@ _tailscale_stop() {
 }
 
 _tailscale_install() {
-    tailscale_version="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
-
     # shellcheck source=tests/os-release
     . /etc/os-release
 
+    # Load the tailscale-env file to discover the flags which are required to be set
+    # shellcheck source=package/tailscale-env
+    . "${TAILSCALE_ROOT}/tailscale-env"
+
+    tailscale_version="${1:-$(curl -sSLq --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/?mode=json" | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
+
     echo "Installing latest Tailscale package repository key..."
-    curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
+    curl -fsSL --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
 
     if [ ! -f "/etc/apt/sources.list.d/tailscale.list" ]; then
         echo "Installing Tailscale package repository..."
-        curl -fsSL --ipv4 "https://pkgs.tailscale.com/stable/${ID}/${VERSION_CODENAME}.list" | tee /etc/apt/sources.list.d/tailscale.list
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.list" | tee /etc/apt/sources.list.d/tailscale.list
     fi
 
     echo "Updating package lists..."
@@ -53,10 +57,6 @@ _tailscale_install() {
 
     echo "Installing Tailscale ${tailscale_version}..."
     apt install -y tailscale="${tailscale_version}"
-
-    # Load the tailscale-env file to discover the flags which are required to be set
-    # shellcheck source=package/tailscale-env
-    . "${TAILSCALE_ROOT}/tailscale-env"
 
     echo "Configuring Tailscale port..."
     sed -i "s/PORT=\"[^\"]*\"/PORT=\"${PORT:-41641}\"/" /etc/default/tailscaled || {
