@@ -15,6 +15,8 @@ export TAILSCALED_SOCK="${WORKDIR}/tailscaled.sock"
 export PATH="${WORKDIR}:${PATH}"
 mock "${WORKDIR}/ubnt-device-info" "1.0.0"
 
+cp "${PACKAGE_ROOT}/tailscale-env" "${WORKDIR}/tailscale-env"
+
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
 
 [[ -f "${TAILSCALE_ROOT}/tailscale" ]]; assert "Tailscale should be installed"
