@@ -1,6 +1,5 @@
 [Unit]
 Description=Ensure that Tailscale is updated automatically on your device.
-Needs=network.target
 
 [Timer]
 OnBootSec=5m
