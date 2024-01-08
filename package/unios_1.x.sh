@@ -68,14 +68,18 @@ _tailscale_stop() {
 }
 
 _tailscale_install() {
-  VERSION="${1:-$(curl -sSLq --ipv4 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
+  # Load the tailscale-env file to discover the flags which are required to be set
+  # shellcheck source=package/tailscale-env
+  . "${TAILSCALE_ROOT}/tailscale-env"
+
+  VERSION="${1:-$(curl -sSLq --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/?mode=json" | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
   WORKDIR="$(mktemp -d || exit 1)"
   trap 'rm -rf ${WORKDIR}' EXIT
   TAILSCALE_TGZ="${WORKDIR}/tailscale.tgz"
 
   echo "Installing Tailscale v${VERSION} in ${TAILSCALE_ROOT}..."
-  curl -sSLf --ipv4 -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz" || {
-    echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/stable/tailscale_${VERSION}_arm64.tgz"
+  curl -sSLf --ipv4 -o "${TAILSCALE_TGZ}" "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/tailscale_${VERSION}_arm64.tgz" || {
+    echo "Failed to download Tailscale v${VERSION} from https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/tailscale_${VERSION}_arm64.tgz"
     echo "Please make sure that you're using a valid version number and try again."
     exit 1
   }

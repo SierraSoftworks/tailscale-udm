@@ -37,6 +37,8 @@ chmod +x "${WORKDIR}/tailscale"
 
 mock "${WORKDIR}/tailscaled" "tailscaled \$1"
 
+cp "${PACKAGE_ROOT}/tailscale-env" "${WORKDIR}/tailscale-env"
+
 touch "${TAILSCALED_SOCK}"; assert "The tailscale socket should be created"
 assert_eq "$("${ROOT}/package/manage.sh" update)" "Tailscaled is running, please stop it before updating" "The update command should exit with an error when Tailscale is running"
 
