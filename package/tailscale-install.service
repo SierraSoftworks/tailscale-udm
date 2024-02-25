@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
+RemainAfterExit=no
 Restart=no
 Environment=DEBIAN_FRONTEND=noninteractive
 ExecStart=/bin/bash /data/tailscale/manage.sh on-boot
