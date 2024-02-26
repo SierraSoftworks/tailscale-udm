@@ -31,10 +31,8 @@ _tailscale_stop() {
 }
 
 _tailscale_install() {
-    if [ -z "${VERSION_CODENAME}" ]; then
-        # shellcheck source=tests/os-release
-        . /etc/os-release
-    fi
+    # shellcheck source=tests/os-release
+    . "${OS_RELEASE_FILE:-/etc/os-release}"
 
     # Load the tailscale-env file to discover the flags which are required to be set
     # shellcheck source=package/tailscale-env
@@ -47,8 +45,8 @@ _tailscale_install() {
         curl -fsSL --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.gpg" | apt-key add -
         curl -fsSL --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.list" | tee /etc/apt/sources.list.d/tailscale.list
     else
-        curl -fsSLo /usr/share/keyrings/tailscale-archive-keyring.gpg --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.noarmor.gpg"
-        curl -fsSLo /etc/apt/sources.list.d/tailscale.list --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.tailscale-keyring.list"
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.noarmor.gpg" | tee /usr/share/keyrings/tailscale-archive-keyring.gpg > /dev/null
+        curl -fsSL --ipv4 "https://pkgs.tailscale.com/${TAILSCALE_CHANNEL}/${ID}/${VERSION_CODENAME}.tailscale-keyring.list" | tee /etc/apt/sources.list.d/tailscale.list > /dev/null
     fi
 
     echo "Updating package lists..."
