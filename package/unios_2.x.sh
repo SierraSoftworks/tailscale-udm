@@ -31,8 +31,10 @@ _tailscale_stop() {
 }
 
 _tailscale_install() {
-    # shellcheck source=tests/os-release
-    . /etc/os-release
+    if [ -z "${VERSION_CODENAME}" ]; then
+        # shellcheck source=tests/os-release
+        . /etc/os-release
+    fi
 
     # Load the tailscale-env file to discover the flags which are required to be set
     # shellcheck source=package/tailscale-env

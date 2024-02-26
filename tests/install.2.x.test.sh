@@ -54,7 +54,8 @@ esac
 EOF
 chmod +x "${WORKDIR}/systemctl"
 
-cp "${ROOT}/tests/os-release" "${WORKDIR}/os-release"
+# shellcheck source=tests/os-release
+. "${ROOT}/tests/os-release"
 cp "${PACKAGE_ROOT}/tailscale-env" "${WORKDIR}/tailscale-env"
 
 "${ROOT}/package/manage.sh" install; assert "Tailscale installer should run successfully"
