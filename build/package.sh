@@ -8,7 +8,7 @@ trap 'rm -rf ${WORKDIR}' EXIT
 
 echo "Preparing temporary build directory"
 mkdir -p "${WORKDIR}/tailscale"
-cp "${SOURCE}/package/*" "${WORKDIR}/tailscale"
+cp -R "${SOURCE}/package" "${WORKDIR}/tailscale"
 cp "${SOURCE}/LICENSE" "${WORKDIR}/tailscale/LICENSE"
 
 mkdir -p "${WORKDIR}/on_boot.d"
