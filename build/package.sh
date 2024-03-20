@@ -15,8 +15,7 @@ mv "${WORKDIR}/tailscale/on-boot.sh" "${WORKDIR}/on_boot.d/10-tailscaled.sh"
 
 echo ""
 echo "Package Contents:"
-cd "$WORKDIR"
-ls -l ./*
+ls -l "$WORKDIR"/*
 echo ""
 
 echo "Building tailscale-udm package"
