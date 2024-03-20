@@ -7,13 +7,13 @@ WORKDIR="$(mktemp -d || exit 1)"
 trap 'rm -rf ${WORKDIR}' EXIT
 
 echo "Preparing temporary build directory"
-mkdir -p "${WORKDIR}/tailscale" "${WORKDIR}/on_boot.d"
-cp "${SOURCE}/package/on-boot.sh" "${WORKDIR}/on_boot.d/10-tailscaled.sh"
-cp "${SOURCE}/package/manage.sh" "${WORKDIR}/tailscale/manage.sh"
-cp "${SOURCE}/package/unios_"*".sh" "${WORKDIR}/tailscale/"
-cp "${SOURCE}/package/tailscale-env" "${WORKDIR}/tailscale/tailscale-env"
-cp "${SOURCE}/package/tailscale-install.service" "${WORKDIR}/tailscale/tailscale-install.service"
+mkdir -p "${WORKDIR}/tailscale"
+cp "${SOURCE}/package/*" "${WORKDIR}/tailscale"
 cp "${SOURCE}/LICENSE" "${WORKDIR}/tailscale/LICENSE"
+
+mkdir -p "${WORKDIR}/on_boot.d"
+mv "${WORKDIR}/tailscale/on-boot.sh" "${WORKDIR}/on_boot.d/10-tailscaled.sh"
+
 
 echo "Building tailscale-udm package"
 mkdir -p "${DEST}"
