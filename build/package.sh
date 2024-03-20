@@ -7,7 +7,6 @@ WORKDIR="$(mktemp -d || exit 1)"
 trap 'rm -rf ${WORKDIR}' EXIT
 
 echo "Preparing temporary build directory"
-mkdir -p "${WORKDIR}/tailscale"
 cp -R "${SOURCE}/package/" "${WORKDIR}/tailscale"
 cp "${SOURCE}/LICENSE" "${WORKDIR}/tailscale/LICENSE"
 
