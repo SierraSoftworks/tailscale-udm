@@ -47,7 +47,7 @@ helper script.
 
 ##### Using `apt`
 ```sh
-apt update && apt upgrade -y tailscale
+apt update && apt install -y tailscale
 ```
 
 ##### Using `manage.sh`
