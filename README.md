@@ -4,7 +4,7 @@ instance on your [Unifi Dream Machine](https://unifi-network.ui.com/dreammachine
 It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https://github.com/boostchicken/udm-utilities)
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
-## UniFi OS 2.x/3.x
+## UniFi OS 2.x/3.x/4.x
 **ⓘ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
 
 **NOTE**: UniFi OS 2.x+ support is currently in beta for this project, if you encounter any issues
