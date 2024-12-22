@@ -51,6 +51,11 @@ fi
 # Extract the package
 tar xzf "${WORKDIR}/tailscale.tgz" -C "$(dirname -- "${PACKAGE_ROOT}")"
 
+# Update tailscale-env with modified values
+if [ -n "${TAILSCALED_FLAGS:-}" ]; then
+  echo "TAILSCALED_FLAGS=\"${TAILSCALED_FLAGS}\"" >> "$package_root/tailscale-env"
+fi
+
 # Run the setup script to ensure that Tailscale is installed
 # shellcheck source=package/manage.sh
 "$PACKAGE_ROOT/manage.sh" install "${TAILSCALE_VERSION}"
