@@ -1,7 +1,7 @@
 [Unit]
 Description=Ensure that Tailscale is installed on your device
 After=network.target
-Requires=mnt-.rwfs.mount
+RequiresMountsFor=/data/tailscale
 Wants=tailscale-install.timer
 
 [Service]
