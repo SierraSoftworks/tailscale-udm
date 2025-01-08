@@ -1,5 +1,6 @@
 [Unit]
 Description=Ensure that Tailscale is updated automatically on your device.
+Requires=tailscale-install.service
 
 [Timer]
 OnBootSec=5m
@@ -7,4 +8,4 @@ OnUnitActiveSec=24h
 Unit=tailscale-install.service
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target

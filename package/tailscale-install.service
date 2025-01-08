@@ -1,13 +1,13 @@
 [Unit]
 Description=Ensure that Tailscale is installed on your device
 After=network.target
+Requires=mnt-.rwfs.mount
+Wants=tailscale-install.timer
 
 [Service]
 Type=oneshot
-RemainAfterExit=no
-Restart=no
 Environment=DEBIAN_FRONTEND=noninteractive
-ExecStart=/bin/bash /data/tailscale/manage.sh on-boot
+ExecStart=/bin/bash -c "/data/tailscale/manage.sh on-boot"
 
 [Install]
 WantedBy=multi-user.target
