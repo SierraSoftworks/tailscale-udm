@@ -53,7 +53,7 @@ tar xzf "${WORKDIR}/tailscale.tgz" -C "$(dirname -- "${PACKAGE_ROOT}")"
 
 # Update tailscale-env with modified values
 if [ -n "${TAILSCALED_FLAGS:-}" ]; then
-  echo "TAILSCALED_FLAGS=\"${TAILSCALED_FLAGS}\"" >> "$package_root/tailscale-env"
+  echo "TAILSCALED_FLAGS=\"${TAILSCALED_FLAGS}\"" >> "$PACKAGE_ROOT/tailscale-env"
 fi
 
 # Run the setup script to ensure that Tailscale is installed
