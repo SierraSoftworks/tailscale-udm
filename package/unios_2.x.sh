@@ -90,9 +90,6 @@ _tailscale_install() {
 
         echo "Installing pre-start script to install Tailscale on firmware updates."
         ln -s "${TAILSCALE_ROOT}/tailscale-install.service" /etc/systemd/system/tailscale-install.service
-
-        systemctl daemon-reload
-        systemctl enable tailscale-install.service
     fi
 
     if [ ! -L "/etc/systemd/system/tailscale-install.timer" ]; then
@@ -102,10 +99,11 @@ _tailscale_install() {
 
         echo "Installing auto-update timer to ensure that Tailscale is kept installed and up to date."
         ln -s "${TAILSCALE_ROOT}/tailscale-install.timer" /etc/systemd/system/tailscale-install.timer
-
-        systemctl daemon-reload
-        systemctl enable --now tailscale-install.timer
     fi
+
+    systemctl daemon-reload
+    systemctl enable tailscale-install.service
+    systemctl enable --now tailscale-install.timer
 
     echo "Installation complete, run '$0 start' to start Tailscale"
 }
@@ -116,4 +114,7 @@ _tailscale_uninstall() {
 
     systemctl disable tailscale-install.service || true
     rm -f /lib/systemd/system/tailscale-install.service || true
+
+    systemctl disable tailscale-install.timer || true
+    rm -f /lib/systemd/system/tailscale-install.timer || true
 }
