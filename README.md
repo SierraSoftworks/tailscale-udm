@@ -173,46 +173,87 @@ tailscale up --advertise-routes="10.0.0.0/24,192.168.0.0/24"
 
 ### Can I route traffic from machines on my local network to Tailscale endpoints automatically?
 
-Yes! As of Jan 30, 2025 [two][1] [changes][2] to tailscale were released which
-make it possible. Much credit is due to @tomvoss who did a lot of the upfront
-legwork which is captured in detail [here][tailnet-routing-discussion].
-
+Yes! As of January 30, 2025, [two][1] [changes][2] to Tailscale have made this
+possible. Much credit goes to @tomvoss, who contributed significant effort to
+the initial implementation, detailed [here][tailnet-routing-discussion].
 Before going further please read tailscale's [subnet router
 documentation][tailscale-subnet-router-docs] and familiarize yourself with the
 concepts of subnet routers, independent of Unifi OS.
 
-Note: It's _not_ required to enable `net.ipv4.ip_forward` on your Unifi OS
-device as it is already enabled by default. If in doubt you can check the status
-of the `net.ipv4.ip_forward` sysctl by running `sysctl net.ipv4.ip_forward`.
+#### Prerequisites
 
-If you've already installed tailscale, you need to drop the `--tun
-userspace-networking` flag and replace it with
-`--socket=/var/run/tailscale/tailscaled.sock` in `/etc/default/tailscaled` and
-then restart tailscaled via `systemctl restart tailscaled`.
+Before proceeding, please review Tailscale’s [subnet router
+documentation][tailscale-subnet-router-docs] to understand the core concepts of
+subnet routing, independent of UniFi OS.
 
-If you have not already installed tailscale, you can install it by exporting the
-`export TAILSCALED_FLAGS="--socket=/var/run/tailscale/tailscaled.sock"`
-environment variable _first_ and then running the [installation](#installation).
+Note: You do not need to manually enable `net.ipv4.ip_forward` on your UniFi OS
+device—it is enabled by default. If you want to confirm its status, run:
 
-A quick way to verify if tailscale is running correctly, check that there is a `tailscale0` interface.
+```sh
+sysctl net.ipv4.ip_forward
+```
+
+#### Installation and Configuration
+
+If Tailscale is already installed, update its configuration:
+
+1. Remove the `--tun userspace-networking` flag from `/etc/default/tailscaled`.
+
+2. Add the following instead:
+
+   ```text
+   --socket=/var/run/tailscale/tailscaled.sock
+   ```
+
+   `FLAGS` in `/etc/default/tailscaled` should look something like this:
+
+   ```text
+   FLAGS="--state=/data/tailscale/tailscaled.state --socket=/var/run/tailscale/tailscaled.sock"
+   ```
+
+3. Restart the Tailscale daemon:
+
+   ```sh
+   systemctl restart tailscaled
+   ```
+
+If Tailscale is not yet installed, first export the required environment variable:
 
 ```
-# ip link show tailscale0
+export TAILSCALED_FLAGS="--socket=/var/run/tailscale/tailscaled.sock"
+```
+
+Then, proceed with the [installation steps](#installation).
+
+#### Verifying Your Setup
+
+To ensure that Tailscale is running correctly, check for the existence of the
+tailscale0 network interface:
+
+```sh
+ip link show tailscale0
+```
+
+A successful setup should return output similar to:
+
+```text
 129: tailscale0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1280 qdisc pfifo_fast state UNKNOWN mode DEFAULT group default qlen 500
     link/none
 ```
 
-If you see this you know you're running in [userspace networking
-mode][tailscale-userspace-networking-docs] (which won't work):
+If you see the following error instead, it means you are still running in
+[userspace networking mode][tailscale-userspace-networking-docs], which will not
+work:
 
 ```text
-# ip link show tailscale0
 Device "tailscale0" does not exist.
 ```
 
-Once you've verified you're _not_ running in userspace networking mode, continue configuring tailscale.
+#### Final Configuration
 
-```text
+Once you have verified that you are not running in userspace networking mode, proceed with configuring Tailscale:
+
+```sh
 tailscale up --advertise-exit-node --advertise-routes="<one-or-more-local-subnets>" --snat-subnet-routes=false --accept-routes --reset
 ```
 
@@ -222,8 +263,7 @@ Example:
 tailscale up --advertise-exit-node --advertise-routes="10.0.0.0/24" --snat-subnet-routes=false --accept-routes --reset
 ```
 
-For more information on the `tailscale up` command, refer to the official
-[documentation][tailscale-up-docs].
+For more details on available options, see the official [tailscale up command documentation][tailscale-up-docs].
 
 ### Why can't I see a network interface for Tailscale?
 
