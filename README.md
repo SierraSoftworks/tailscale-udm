@@ -197,6 +197,9 @@ sysctl net.ipv4.ip_forward
 
 If Tailscale is already installed, update its configuration:
 
+WARNING: Please be sure to do this over a local connection (not tailscale) as
+your connection will be disrupted.
+
 1. Remove the `--tun userspace-networking` flag from `/etc/default/tailscaled`.
 
 2. Add the following instead:
@@ -216,6 +219,17 @@ If Tailscale is already installed, update its configuration:
    ```sh
    systemctl restart tailscaled
    ```
+
+In order to persist the changes made to `/etc/default/tailscaled` you MUST
+modify `/data/tailscale/tailscale-env` also, i.e.
+
+```text
+PORT="41641"
+TAILSCALED_FLAGS="--socket=/var/run/tailscale/tailscaled.sock"
+TAILSCALE_FLAGS=""
+TAILSCALE_AUTOUPDATE="true"
+TAILSCALE_CHANNEL="stable"
+```
 
 If Tailscale is not yet installed, first export the required environment variable:
 
