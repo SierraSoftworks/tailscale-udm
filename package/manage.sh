@@ -12,10 +12,15 @@ elif [ -f "/usr/lib/version" ]; then
   # UCKG2 == UniFi CloudKey Gen2
   # example /usr/lib/version file contents:
   # UCKG2.apq8053.v3.1.13.3584673.230626.2239
+  # UNASPRO == Unas Pro
+  # example /usr/lib/version file contents:
+  # UNASPRO.al324.v4.2.9.3ec2ce6.250417.1324
   if [ "$(grep -c '^UCKP.*\.v[0-9]\.' /usr/lib/version)" = '1' ]; then
     OS_VERSION="$(sed -e 's/UCKP.*.v\(.\)\..*/\1/' /usr/lib/version)"
   elif [ "$(grep -c '^UCKG2.*\.v[0-9]\.' /usr/lib/version)" = '1' ]; then
     OS_VERSION="$(sed -e 's/UCKG2.*.v\(.\)\..*/\1/' /usr/lib/version)"
+  elif [ "$(grep -c '^UNASPRO.*\.v[0-9]\.' /usr/lib/version)" = '1' ]; then
+    OS_VERSION="$(sed -e 's/UNASPRO.*.v\(.\)\..*/\1/' /usr/lib/version)"
   else
     echo "Could not detect OS Version.  /usr/lib/version contains:"
     cat /usr/lib/version
