@@ -5,7 +5,7 @@ name: Build
 jobs:
   build:
     name: "Package"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: ./build/package.sh ./ ./dist
@@ -16,7 +16,7 @@ jobs:
 
   test:
     name: Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: ./tests/run.sh
