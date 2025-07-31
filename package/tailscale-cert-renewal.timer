@@ -1,0 +1,10 @@
+[Unit]
+Description=Tailscale Certificate Renewal Timer
+Requires=tailscale-cert-renewal.service
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

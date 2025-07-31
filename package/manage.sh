@@ -159,8 +159,12 @@ case $1 in
 
     tailscale_start
     ;;
+  "cert")
+    shift
+    _tailscale_cert "$@"
+    ;;
   *)
-    echo "Usage: $0 {status|start|stop|restart|install|uninstall|update}"
+    echo "Usage: $0 {status|start|stop|restart|install|uninstall|update|cert}"
     exit 1
     ;;
 esac

@@ -1,0 +1,9 @@
+[Unit]
+Description=Tailscale Certificate Renewal
+After=network.target tailscaled.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'for cert in /data/tailscale/certs/*.crt; do [ -f "$cert" ] && hostname="${cert##*/}" && hostname="${hostname%.crt}" && /data/tailscale/manage.sh cert renew "$hostname"; done'
+StandardOutput=journal
+StandardError=journal

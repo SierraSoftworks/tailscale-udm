@@ -1,0 +1,146 @@
+#!/bin/sh
+# shellcheck source=tests/helpers.sh
+. "$(dirname "$0")/helpers.sh"
+
+# Mock the tailscale cert command
+mock_tailscale_cert() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --cert-file)
+                cert_file="$2"
+                shift 2
+                ;;
+            --key-file)
+                key_file="$2"
+                shift 2
+                ;;
+            *)
+                hostname="$1"
+                shift
+                ;;
+        esac
+    done
+    
+    if [ -n "$cert_file" ] && [ -n "$key_file" ]; then
+        echo "CERTIFICATE" > "$cert_file"
+        echo "PRIVATE KEY" > "$key_file"
+        return 0
+    fi
+    return 1
+}
+
+# Override tailscale command for testing
+tailscale() {
+    case "$1" in
+        cert)
+            shift
+            mock_tailscale_cert "$@"
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
+
+# Test certificate generation
+test_cert_generate() {
+    export TAILSCALE_ROOT="/tmp/tailscale-test"
+    mkdir -p "$TAILSCALE_ROOT"
+    
+    # Mock running state
+    _tailscale_is_running() { return 0; }
+    
+    # Test generate with default hostname
+    output=$(_tailscale_cert generate test-host 2>&1)
+    assert_contains "$output" "Certificate generated successfully"
+    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.crt"
+    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.key"
+    
+    # Check file permissions
+    cert_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.crt" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.crt" | cut -c4-6)
+    key_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.key" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.key" | cut -c4-6)
+    assert_equals "644" "$cert_perms"
+    assert_equals "600" "$key_perms"
+    
+    rm -rf "$TAILSCALE_ROOT/certs"
+}
+
+# Test certificate renewal
+test_cert_renew() {
+    export TAILSCALE_ROOT="/tmp/tailscale-test"
+    mkdir -p "$TAILSCALE_ROOT/certs"
+    
+    # Mock running state
+    _tailscale_is_running() { return 0; }
+    
+    # Create existing certificates
+    echo "OLD CERT" > "$TAILSCALE_ROOT/certs/test-host.crt"
+    echo "OLD KEY" > "$TAILSCALE_ROOT/certs/test-host.key"
+    
+    # Test renew
+    output=$(_tailscale_cert renew test-host 2>&1)
+    assert_contains "$output" "Certificate renewed successfully"
+    
+    # Check that certificates were updated
+    cert_content=$(cat "$TAILSCALE_ROOT/certs/test-host.crt")
+    assert_equals "CERTIFICATE" "$cert_content"
+    
+    rm -rf "$TAILSCALE_ROOT/certs"
+}
+
+# Test certificate listing
+test_cert_list() {
+    export TAILSCALE_ROOT="/tmp/tailscale-test"
+    mkdir -p "$TAILSCALE_ROOT/certs"
+    
+    # Create test certificates
+    echo "CERT1" > "$TAILSCALE_ROOT/certs/host1.crt"
+    echo "KEY1" > "$TAILSCALE_ROOT/certs/host1.key"
+    echo "CERT2" > "$TAILSCALE_ROOT/certs/host2.crt"
+    echo "KEY2" > "$TAILSCALE_ROOT/certs/host2.key"
+    
+    # Test list
+    output=$(_tailscale_cert list 2>&1)
+    assert_contains "$output" "host1"
+    assert_contains "$output" "host2"
+    assert_contains "$output" "Certificate:"
+    assert_contains "$output" "Private key:"
+    
+    rm -rf "$TAILSCALE_ROOT/certs"
+}
+
+# Test when tailscale is not running
+test_cert_not_running() {
+    export TAILSCALE_ROOT="/tmp/tailscale-test"
+    mkdir -p "$TAILSCALE_ROOT"
+    
+    # Mock not running state
+    _tailscale_is_running() { return 1; }
+    
+    # Test generate when not running
+    output=$(_tailscale_cert generate test-host 2>&1 || true)
+    assert_contains "$output" "Tailscale is not running"
+    
+    rm -rf "$TAILSCALE_ROOT"
+}
+
+# Test help command
+test_cert_help() {
+    output=$(_tailscale_cert help 2>&1)
+    assert_contains "$output" "Usage:"
+    assert_contains "$output" "generate"
+    assert_contains "$output" "renew"
+    assert_contains "$output" "list"
+    assert_contains "$output" "install-unifi"
+}
+
+# Run tests
+setup
+test_cert_generate
+test_cert_renew
+test_cert_list
+test_cert_not_running
+test_cert_help
+teardown
+
+echo "All certificate tests passed!"
