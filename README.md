@@ -189,16 +189,17 @@ Tailscale can generate valid HTTPS certificates for your UDM using Let's Encrypt
 
 ```sh
 # Generate a certificate
-/data/tailscale/manage.sh cert generate [hostname]
+/data/tailscale/manage.sh cert generate
 
 # Install certificate into UniFi OS (2.x+)
-/data/tailscale/manage.sh cert install-unifi [hostname]
+/data/tailscale/manage.sh cert install-unifi
 
 # Restart UniFi Core to apply
 systemctl restart unifi-core
 ```
 
-Certificates expire after 90 days. Use `cert renew [hostname]` to renew them.
+Certificates expire after 90 days. Use `cert renew` to renew them.
+The hostname is automatically determined from your Tailscale configuration.
 
 On UniFi OS 2.x+, a systemd timer is automatically installed when you generate
 your first certificate. This timer runs weekly to check and renew certificates

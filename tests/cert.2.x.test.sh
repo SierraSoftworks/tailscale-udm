@@ -36,10 +36,22 @@ tailscale() {
             shift
             mock_tailscale_cert "$@"
             ;;
+        status)
+            if [ "$2" = "--json" ]; then
+                echo '{"Self": {"DNSName": "test-host.example.ts.net."}}'
+            fi
+            ;;
         *)
             return 0
             ;;
     esac
+}
+
+# Mock jq for hostname extraction
+jq() {
+    if [ "$1" = "-r" ] && [ "$2" = ".Self.DNSName" ]; then
+        echo "test-host.example.ts.net."
+    fi
 }
 
 # Test certificate generation
@@ -50,15 +62,15 @@ test_cert_generate() {
     # Mock running state
     _tailscale_is_running() { return 0; }
     
-    # Test generate with default hostname
-    output=$(_tailscale_cert generate test-host 2>&1)
+    # Test generate
+    output=$(_tailscale_cert generate 2>&1)
     assert_contains "$output" "Certificate generated successfully"
-    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.crt"
-    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.key"
+    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt"
+    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key"
     
     # Check file permissions
-    cert_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.crt" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.crt" | cut -c4-6)
-    key_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.key" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.key" | cut -c4-6)
+    cert_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" | cut -c4-6)
+    key_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" | cut -c4-6)
     assert_equals "644" "$cert_perms"
     assert_equals "600" "$key_perms"
     
@@ -74,15 +86,15 @@ test_cert_renew() {
     _tailscale_is_running() { return 0; }
     
     # Create existing certificates
-    echo "OLD CERT" > "$TAILSCALE_ROOT/certs/test-host.crt"
-    echo "OLD KEY" > "$TAILSCALE_ROOT/certs/test-host.key"
+    echo "OLD CERT" > "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt"
+    echo "OLD KEY" > "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key"
     
     # Test renew
-    output=$(_tailscale_cert renew test-host 2>&1)
+    output=$(_tailscale_cert renew 2>&1)
     assert_contains "$output" "Certificate renewed successfully"
     
     # Check that certificates were updated
-    cert_content=$(cat "$TAILSCALE_ROOT/certs/test-host.crt")
+    cert_content=$(cat "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt")
     assert_equals "CERTIFICATE" "$cert_content"
     
     rm -rf "$TAILSCALE_ROOT/certs"
@@ -118,7 +130,7 @@ test_cert_not_running() {
     _tailscale_is_running() { return 1; }
     
     # Test generate when not running
-    output=$(_tailscale_cert generate test-host 2>&1 || true)
+    output=$(_tailscale_cert generate 2>&1 || true)
     assert_contains "$output" "Tailscale is not running"
     
     rm -rf "$TAILSCALE_ROOT"
@@ -135,12 +147,10 @@ test_cert_help() {
 }
 
 # Run tests
-setup
 test_cert_generate
 test_cert_renew
 test_cert_list
 test_cert_not_running
 test_cert_help
-teardown
 
 echo "All certificate tests passed!"

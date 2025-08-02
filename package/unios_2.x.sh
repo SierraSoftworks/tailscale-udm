@@ -126,16 +126,24 @@ _tailscale_uninstall() {
 
 _tailscale_cert() {
     action="${1:-help}"
-    hostname="${2:-$(hostname)}"
     cert_dir="${TAILSCALE_ROOT}/certs"
+    
+    # Derive hostname from tailscale status (except for help and list commands)
+    if [ "$action" != "help" ] && [ "$action" != "list" ]; then
+        if ! _tailscale_is_running; then
+            echo "Tailscale is not running. Please start Tailscale first."
+            exit 1
+        fi
+        
+        hostname=$(tailscale status --json | jq -r '.Self.DNSName' | sed 's/\.$//')
+        if [ -z "$hostname" ]; then
+            echo "Failed to determine Tailscale hostname"
+            exit 1
+        fi
+    fi
     
     case "$action" in
         generate)
-            if ! _tailscale_is_running; then
-                echo "Tailscale is not running. Please start Tailscale first."
-                exit 1
-            fi
-            
             mkdir -p "$cert_dir"
             echo "Generating certificate for $hostname..."
             
@@ -170,14 +178,9 @@ _tailscale_cert() {
             ;;
             
         renew)
-            if ! _tailscale_is_running; then
-                echo "Tailscale is not running. Please start Tailscale first."
-                exit 1
-            fi
-            
             if [ ! -f "$cert_dir/$hostname.crt" ] || [ ! -f "$cert_dir/$hostname.key" ]; then
                 echo "Certificate not found for $hostname"
-                echo "Use '$0 cert generate $hostname' to create a new certificate"
+                echo "Use '$0 cert generate' to create a new certificate"
                 exit 1
             fi
             
@@ -230,7 +233,7 @@ _tailscale_cert() {
         install-unifi)
             if [ ! -f "$cert_dir/$hostname.crt" ] || [ ! -f "$cert_dir/$hostname.key" ]; then
                 echo "Certificate not found for $hostname"
-                echo "Use '$0 cert generate $hostname' to create a certificate first"
+                echo "Use '$0 cert generate' to create a certificate first"
                 exit 1
             fi
             
@@ -281,22 +284,22 @@ EOF
             ;;
             
         help|*)
-            echo "Usage: $0 cert {generate|renew|list|install-unifi} [hostname]"
+            echo "Usage: $0 cert {generate|renew|list|install-unifi}"
             echo ""
             echo "Commands:"
-            echo "  generate [hostname]     - Generate new certificate for hostname (default: system hostname)"
-            echo "  renew [hostname]        - Renew existing certificate"
-            echo "  list                    - List all stored certificates"
-            echo "  install-unifi [hostname] - Install certificate into UniFi controller"
+            echo "  generate        - Generate new certificate for this device"
+            echo "  renew           - Renew existing certificate"
+            echo "  list            - List all stored certificates"
+            echo "  install-unifi   - Install certificate into UniFi controller"
             echo ""
             echo "Examples:"
             echo "  $0 cert generate"
-            echo "  $0 cert generate myudm"
-            echo "  $0 cert renew myudm"
-            echo "  $0 cert install-unifi myudm"
+            echo "  $0 cert renew"
+            echo "  $0 cert install-unifi"
             echo ""
-            echo "Note: Certificates expire after 90 days and must be renewed manually."
+            echo "Note: Certificates expire after 90 days."
             echo "      MagicDNS and HTTPS must be enabled in your Tailscale admin console."
+            echo "      Hostname is automatically determined from Tailscale status."
             ;;
     esac
 }
