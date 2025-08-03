@@ -66,7 +66,7 @@ cat "${WORKDIR}/sed.args"
 
 assert_contains "$(head -n 1 "${WORKDIR}/apt.args")" "update" "The apt command should be called to update the package list"
 assert_contains "$(head -n 2 "${WORKDIR}/apt.args" | tail -n 1)" "install -y tailscale" "The apt command should be called with the command to install tailscale file"
-assert_contains "$(cat "${WORKDIR}/sed.args")" "--tun userspace-networking" "The defaults should be updated with userspace networking"
+assert_contains "$(cat "${WORKDIR}/sed.args")" "--state /data/tailscale" "The defaults should be updated with state directory"
 [[ -f "${WORKDIR}/tailscaled.restarted" ]]; assert "tailscaled should have been restarted"
 [[ -f "${WORKDIR}/tailscaled.service.enabled" ]]; assert "tailscaled unit should be enabled"
 [[ -f "${WORKDIR}/systemctl.daemon-reload" ]]; assert "systemctl should have been reloaded"
