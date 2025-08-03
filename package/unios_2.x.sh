@@ -135,7 +135,7 @@ _tailscale_cert() {
             exit 1
         fi
         
-        hostname=$(tailscale status --json | jq -r '.Self.DNSName' | sed 's/\.$//')
+        hostname=$(tailscale status --json | jq -r '.Self.DNSName[:-1]')
         if [ -z "$hostname" ]; then
             echo "Failed to determine Tailscale hostname"
             exit 1
