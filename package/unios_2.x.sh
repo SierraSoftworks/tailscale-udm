@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/data/tailscale}"
 export TAILSCALE="tailscale"
 
@@ -117,4 +117,189 @@ _tailscale_uninstall() {
 
     systemctl disable tailscale-install.timer || true
     rm -f /lib/systemd/system/tailscale-install.timer || true
+    
+    systemctl disable tailscale-cert-renewal.timer || true
+    systemctl stop tailscale-cert-renewal.timer || true
+    rm -f /lib/systemd/system/tailscale-cert-renewal.service || true
+    rm -f /lib/systemd/system/tailscale-cert-renewal.timer || true
+}
+
+_tailscale_cert() {
+    action="${1:-help}"
+    cert_dir="${TAILSCALE_ROOT}/certs"
+    
+    # Derive hostname from tailscale status (except for help and list commands)
+    if [ "$action" != "help" ] && [ "$action" != "list" ]; then
+        if ! _tailscale_is_running; then
+            echo "Tailscale is not running. Please start Tailscale first."
+            exit 1
+        fi
+        
+        hostname=$(tailscale status --json | jq -r '.Self.DNSName' | sed 's/\.$//')
+        if [ -z "$hostname" ]; then
+            echo "Failed to determine Tailscale hostname"
+            exit 1
+        fi
+    fi
+    
+    case "$action" in
+        generate)
+            mkdir -p "$cert_dir"
+            echo "Generating certificate for $hostname..."
+            
+            if tailscale cert --cert-file "$cert_dir/$hostname.crt" --key-file "$cert_dir/$hostname.key" "$hostname"; then
+                chmod 644 "$cert_dir/$hostname.crt"
+                chmod 600 "$cert_dir/$hostname.key"
+                echo "Certificate generated successfully:"
+                echo "  Certificate: $cert_dir/$hostname.crt"
+                echo "  Private key: $cert_dir/$hostname.key"
+                echo ""
+                echo "Certificate expires in 90 days. Use '$0 cert renew $hostname' to renew."
+                
+                # Install auto-renewal timer if not already installed
+                if [ ! -L "/etc/systemd/system/tailscale-cert-renewal.service" ]; then
+                    if [ -f "${TAILSCALE_ROOT}/tailscale-cert-renewal.service" ] && [ -f "${TAILSCALE_ROOT}/tailscale-cert-renewal.timer" ]; then
+                        echo "Installing certificate auto-renewal timer..."
+                        ln -s "${TAILSCALE_ROOT}/tailscale-cert-renewal.service" /etc/systemd/system/
+                        ln -s "${TAILSCALE_ROOT}/tailscale-cert-renewal.timer" /etc/systemd/system/
+                        systemctl daemon-reload
+                        systemctl enable tailscale-cert-renewal.timer
+                        systemctl start tailscale-cert-renewal.timer
+                        echo "Certificate will be automatically renewed weekly"
+                    fi
+                fi
+            else
+                echo "Failed to generate certificate. Ensure:"
+                echo "  - MagicDNS is enabled in your Tailscale admin console"
+                echo "  - HTTPS is enabled in your Tailscale admin console"
+                echo "  - The hostname '$hostname' matches your Tailscale machine name"
+                exit 1
+            fi
+            ;;
+            
+        renew)
+            if [ ! -f "$cert_dir/$hostname.crt" ] || [ ! -f "$cert_dir/$hostname.key" ]; then
+                echo "Certificate not found for $hostname"
+                echo "Use '$0 cert generate' to create a new certificate"
+                exit 1
+            fi
+            
+            echo "Renewing certificate for $hostname..."
+            
+            # Backup existing certificates
+            cp "$cert_dir/$hostname.crt" "$cert_dir/$hostname.crt.bak"
+            cp "$cert_dir/$hostname.key" "$cert_dir/$hostname.key.bak"
+            
+            if tailscale cert --cert-file "$cert_dir/$hostname.crt" --key-file "$cert_dir/$hostname.key" "$hostname"; then
+                chmod 644 "$cert_dir/$hostname.crt"
+                chmod 600 "$cert_dir/$hostname.key"
+                rm -f "$cert_dir/$hostname.crt.bak" "$cert_dir/$hostname.key.bak"
+                echo "Certificate renewed successfully"
+            else
+                # Restore backups on failure
+                mv "$cert_dir/$hostname.crt.bak" "$cert_dir/$hostname.crt"
+                mv "$cert_dir/$hostname.key.bak" "$cert_dir/$hostname.key"
+                echo "Failed to renew certificate"
+                exit 1
+            fi
+            ;;
+            
+        list)
+            if [ -d "$cert_dir" ]; then
+                echo "Certificates stored in $cert_dir:"
+                echo ""
+                for cert in "$cert_dir"/*.crt; do
+                    if [ -f "$cert" ]; then
+                        basename="${cert##*/}"
+                        hostname="${basename%.crt}"
+                        echo "  $hostname:"
+                        echo "    Certificate: $cert"
+                        echo "    Private key: $cert_dir/$hostname.key"
+                        if command -v openssl >/dev/null 2>&1; then
+                            expiry=$(openssl x509 -enddate -noout -in "$cert" | cut -d= -f2)
+                            echo "    Expires: $expiry"
+                        fi
+                        echo ""
+                    fi
+                done
+                if ! ls -A "$cert_dir"/*.crt >/dev/null 2>&1; then
+                    echo "  No certificates found"
+                fi
+            else
+                echo "No certificates directory found"
+            fi
+            ;;
+            
+        install-unifi)
+            if [ ! -f "$cert_dir/$hostname.crt" ] || [ ! -f "$cert_dir/$hostname.key" ]; then
+                echo "Certificate not found for $hostname"
+                echo "Use '$0 cert generate' to create a certificate first"
+                exit 1
+            fi
+            
+            echo "Installing certificate for UniFi controller..."
+            
+            # Install for UniFi OS (nginx)
+            if [ -d "/data/unifi-core/config" ]; then
+                echo "Installing certificate for UniFi OS web interface..."
+                
+                # Generate a UUID for the certificate
+                cert_uuid=$(cat /proc/sys/kernel/random/uuid)
+                
+                # Copy certificates with UUID names
+                cp "$cert_dir/$hostname.crt" "/data/unifi-core/config/$cert_uuid.crt"
+                cp "$cert_dir/$hostname.key" "/data/unifi-core/config/$cert_uuid.key"
+                
+                # Set proper permissions
+                chmod 644 "/data/unifi-core/config/$cert_uuid.crt"
+                chmod 600 "/data/unifi-core/config/$cert_uuid.key"
+                
+                # Register certificate in PostgreSQL database for persistence
+                if [ -f "${TAILSCALE_ROOT}/cert-db-register.sh" ]; then
+                    echo "Registering certificate in database..."
+                    sh "${TAILSCALE_ROOT}/cert-db-register.sh" "$cert_uuid" "/data/unifi-core/config/$cert_uuid.crt" "/data/unifi-core/config/$cert_uuid.key" "$hostname"
+                else
+                    echo "Warning: Database registration script not found. Certificate may not persist across restarts."
+                fi
+                
+                # Update nginx configuration
+                cat > /data/unifi-core/config/http/local-certs.conf <<EOF
+ssl_certificate     /data/unifi-core/config/$cert_uuid.crt;
+ssl_certificate_key /data/unifi-core/config/$cert_uuid.key;
+EOF
+                
+                # Update settings.yaml to activate the certificate
+                if grep -q "activeCertId:" /data/unifi-core/config/settings.yaml 2>/dev/null; then
+                    # Update existing activeCertId
+                    sed -i "s/activeCertId: .*/activeCertId: $cert_uuid/" /data/unifi-core/config/settings.yaml
+                else
+                    # Add activeCertId if it doesn't exist
+                    echo "activeCertId: $cert_uuid" >> /data/unifi-core/config/settings.yaml
+                fi
+                
+                echo "UniFi OS certificate installed with ID: $cert_uuid"
+                echo "Note: Restart unifi-core for the certificate to take effect:"
+                echo "  systemctl restart unifi-core"
+            fi
+            ;;
+            
+        help|*)
+            echo "Usage: $0 cert {generate|renew|list|install-unifi}"
+            echo ""
+            echo "Commands:"
+            echo "  generate        - Generate new certificate for this device"
+            echo "  renew           - Renew existing certificate"
+            echo "  list            - List all stored certificates"
+            echo "  install-unifi   - Install certificate into UniFi controller"
+            echo ""
+            echo "Examples:"
+            echo "  $0 cert generate"
+            echo "  $0 cert renew"
+            echo "  $0 cert install-unifi"
+            echo ""
+            echo "Note: Certificates expire after 90 days."
+            echo "      MagicDNS and HTTPS must be enabled in your Tailscale admin console."
+            echo "      Hostname is automatically determined from Tailscale status."
+            ;;
+    esac
 }

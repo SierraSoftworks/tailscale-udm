@@ -1,0 +1,9 @@
+[Unit]
+Description=Tailscale Certificate Renewal
+After=network.target tailscaled.service
+
+[Service]
+Type=oneshot
+ExecStart=/data/tailscale/manage.sh cert renew
+StandardOutput=journal
+StandardError=journal

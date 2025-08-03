@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/mnt/data/tailscale}"
 export TAILSCALE="${TAILSCALE_ROOT}/tailscale"
 export TAILSCALED="${TAILSCALE_ROOT}/tailscaled"
@@ -95,4 +95,117 @@ _tailscale_uninstall() {
   $TAILSCALED --cleanup
   rm -rf /mnt/data/tailscale
   rm -f /mnt/data/on_boot.d/10-tailscaled.sh
+}
+
+_tailscale_cert() {
+  action="${1:-help}"
+  cert_dir="${TAILSCALE_ROOT}/certs"
+  
+  # Derive hostname from tailscale status (except for help and list commands)
+  if [ "$action" != "help" ] && [ "$action" != "list" ]; then
+    if ! _tailscale_is_running; then
+      echo "Tailscale is not running. Please start Tailscale first."
+      exit 1
+    fi
+    
+    hostname=$($TAILSCALE status --json | jq -r '.Self.DNSName' | sed 's/\.$//')
+    if [ -z "$hostname" ]; then
+      echo "Failed to determine Tailscale hostname"
+      exit 1
+    fi
+  fi
+  
+  case "$action" in
+    generate)
+      
+      mkdir -p "$cert_dir"
+      echo "Generating certificate for $hostname..."
+      
+      if $TAILSCALE cert --cert-file "$cert_dir/$hostname.crt" --key-file "$cert_dir/$hostname.key" "$hostname"; then
+        chmod 644 "$cert_dir/$hostname.crt"
+        chmod 600 "$cert_dir/$hostname.key"
+        echo "Certificate generated successfully:"
+        echo "  Certificate: $cert_dir/$hostname.crt"
+        echo "  Private key: $cert_dir/$hostname.key"
+        echo ""
+        echo "Certificate expires in 90 days. Use '$0 cert renew' to renew."
+      else
+        echo "Failed to generate certificate. Ensure:"
+        echo "  - MagicDNS is enabled in your Tailscale admin console"
+        echo "  - HTTPS is enabled in your Tailscale admin console"
+        exit 1
+      fi
+      ;;
+      
+    renew)
+      if [ ! -f "$cert_dir/$hostname.crt" ] || [ ! -f "$cert_dir/$hostname.key" ]; then
+        echo "Certificate not found for $hostname"
+        echo "Use '$0 cert generate' to create a new certificate"
+        exit 1
+      fi
+      
+      echo "Renewing certificate for $hostname..."
+      
+      # Backup existing certificates
+      cp "$cert_dir/$hostname.crt" "$cert_dir/$hostname.crt.bak"
+      cp "$cert_dir/$hostname.key" "$cert_dir/$hostname.key.bak"
+      
+      if $TAILSCALE cert --cert-file "$cert_dir/$hostname.crt" --key-file "$cert_dir/$hostname.key" "$hostname"; then
+        chmod 644 "$cert_dir/$hostname.crt"
+        chmod 600 "$cert_dir/$hostname.key"
+        rm -f "$cert_dir/$hostname.crt.bak" "$cert_dir/$hostname.key.bak"
+        echo "Certificate renewed successfully"
+      else
+        # Restore backups on failure
+        mv "$cert_dir/$hostname.crt.bak" "$cert_dir/$hostname.crt"
+        mv "$cert_dir/$hostname.key.bak" "$cert_dir/$hostname.key"
+        echo "Failed to renew certificate"
+        exit 1
+      fi
+      ;;
+      
+    list)
+      if [ -d "$cert_dir" ]; then
+        echo "Certificates stored in $cert_dir:"
+        echo ""
+        cert_files=( "$cert_dir"/*.crt )
+        for cert in "${cert_files[@]}"; do
+          if [ -f "$cert" ]; then
+            basename="${cert##*/}"
+            hostname="${basename%.crt}"
+            echo "  $hostname:"
+            echo "    Certificate: $cert"
+            echo "    Private key: $cert_dir/$hostname.key"
+            if command -v openssl >/dev/null 2>&1; then
+              expiry=$(openssl x509 -enddate -noout -in "$cert" | cut -d= -f2)
+              echo "    Expires: $expiry"
+            fi
+            echo ""
+          fi
+        done
+        if ! ls -A "$cert_dir"/*.crt >/dev/null 2>&1; then
+          echo "  No certificates found"
+        fi
+      else
+        echo "No certificates directory found"
+      fi
+      ;;
+      
+    help|*)
+      echo "Usage: $0 cert {generate|renew|list}"
+      echo ""
+      echo "Commands:"
+      echo "  generate        - Generate new certificate for this device"
+      echo "  renew           - Renew existing certificate"
+      echo "  list            - List all stored certificates"
+      echo ""
+      echo "Examples:"
+      echo "  $0 cert generate"
+      echo "  $0 cert renew"
+      echo ""
+      echo "Note: Certificates expire after 90 days."
+      echo "      MagicDNS and HTTPS must be enabled in your Tailscale admin console."
+      echo "      Hostname is automatically determined from Tailscale status."
+      ;;
+  esac
 }

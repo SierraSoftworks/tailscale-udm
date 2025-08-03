@@ -181,3 +181,26 @@ to enable it. You'll need to setup SSH ACLs in your account by following
 # Enable SSH advertisment through Tailscale
 tailscale up --ssh
 ```
+
+### How do I generate HTTPS certificates with Tailscale?
+Tailscale can generate valid HTTPS certificates for your UDM using Let's Encrypt. This requires:
+- MagicDNS enabled in your Tailscale admin console
+- HTTPS enabled in your Tailscale admin console
+
+```sh
+# Generate a certificate
+/data/tailscale/manage.sh cert generate
+
+# Install certificate into UniFi OS (2.x+)
+/data/tailscale/manage.sh cert install-unifi
+
+# Restart UniFi Core to apply
+systemctl restart unifi-core
+```
+
+Certificates expire after 90 days. Use `cert renew` to renew them.
+The hostname is automatically determined from your Tailscale configuration.
+
+On UniFi OS 2.x+, a systemd timer is automatically installed when you generate
+your first certificate. This timer runs weekly to check and renew certificates
+before they expire.
