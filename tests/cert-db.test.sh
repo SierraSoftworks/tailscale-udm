@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # shellcheck source=tests/helpers.sh
 . "$(dirname "$0")/helpers.sh"
 
@@ -34,7 +34,7 @@ ol92NiAPfl2MLJV8Mvni4v3pc0HyC6YzSg==
 EOF
 
 # Test UUID generation
-test_uuid="12345678-1234-1234-1234-123456789012"
+#test_uuid="12345678-1234-1234-1234-123456789012"
 
 # Test certificate content extraction
 if command -v openssl >/dev/null 2>&1; then

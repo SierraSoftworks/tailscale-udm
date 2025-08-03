@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # shellcheck source=tests/helpers.sh
 . "$(dirname "$0")/helpers.sh"
 
@@ -15,7 +15,7 @@ mock_tailscale_cert() {
                 shift 2
                 ;;
             *)
-                hostname="$1"
+                #hostname="$1"
                 shift
                 ;;
         esac

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/mnt/data/tailscale}"
 export TAILSCALE="${TAILSCALE_ROOT}/tailscale"
 export TAILSCALED="${TAILSCALE_ROOT}/tailscaled"
@@ -168,7 +168,8 @@ _tailscale_cert() {
       if [ -d "$cert_dir" ]; then
         echo "Certificates stored in $cert_dir:"
         echo ""
-        for cert in "$cert_dir"/*.crt; do
+        cert_files=( "$cert_dir"/*.crt )
+        for cert in "${cert_files[@]}"; do
           if [ -f "$cert" ]; then
             basename="${cert##*/}"
             hostname="${basename%.crt}"
@@ -182,7 +183,7 @@ _tailscale_cert() {
             echo ""
           fi
         done
-        if [ ! -f "$cert_dir"/*.crt ]; then
+        if ! ls -A "$cert_dir"/*.crt >/dev/null 2>&1; then
           echo "  No certificates found"
         fi
       else

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 export TAILSCALE_ROOT="${TAILSCALE_ROOT:-/data/tailscale}"
 export TAILSCALE="tailscale"
 
@@ -222,7 +222,7 @@ _tailscale_cert() {
                         echo ""
                     fi
                 done
-                if [ ! -f "$cert_dir"/*.crt ]; then
+                if ! ls -A "$cert_dir"/*.crt >/dev/null 2>&1; then
                     echo "  No certificates found"
                 fi
             else

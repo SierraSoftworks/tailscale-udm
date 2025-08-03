@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Register certificate in UniFi OS PostgreSQL database
 
 cert_uuid="$1"
@@ -34,7 +34,7 @@ if command -v openssl >/dev/null 2>&1; then
     
     # Get certificate details
     subject_text=$(openssl x509 -noout -subject -in "$cert_file" | sed 's/subject=//')
-    issuer_text=$(openssl x509 -noout -issuer -in "$cert_file" | sed 's/issuer=//')
+    #issuer_text=$(openssl x509 -noout -issuer -in "$cert_file" | sed 's/issuer=//')
     serial=$(openssl x509 -noout -serial -in "$cert_file" | cut -d= -f2)
     fingerprint=$(openssl x509 -noout -fingerprint -SHA256 -in "$cert_file" | cut -d= -f2 | tr -d ':')
     
@@ -54,7 +54,7 @@ else
 fi
 
 # Escape values for SQL
-cn_escaped=$(echo "$cn" | sed "s/'/\'\'/g")
+cn_escaped="${cn//\'/\'\'}"  # Escape single quotes
 cert_name="Tailscale Certificate - $cn_escaped"
 
 # PostgreSQL connection settings
