@@ -5,6 +5,20 @@ instance on your [UniFi Dream Machine](https://unifi-network.ui.com/dreammachine
 It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https://github.com/boostchicken/udm-utilities)
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
+## Installation
+
+1. Run the `install.sh` script to install the latest version of the
+   Tailscale UDM package on your UDM.
+
+   ```sh
+   # Install the latest version of Tailscale UDM
+   curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
+   ```
+
+2. Run `tailscale up` to start Tailscale.
+3. Follow the on-screen steps to configure Tailscale and connect it to your network.
+4. Confirm that Tailscale is working by running `tailscale status`
+
 ## Compatibility
 
 **ⓘ You can confirm your OS version by running `/usr/bin/ubnt-device-info firmware_detail`**
@@ -33,23 +47,9 @@ should use the legacy version of this package, which is available in the `legacy
 this repository. The legacy version is no longer maintained and may not work with the latest
 version of Tailscale.
 
-### Installation
+## Management
 
-1. Run the `install.sh` script to install the latest version of the
-   Tailscale UDM package on your UDM.
-
-   ```sh
-   # Install the latest version of Tailscale UDM
-   curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
-   ```
-
-2. Run `tailscale up` to start Tailscale.
-3. Follow the on-screen steps to configure Tailscale and connect it to your network.
-4. Confirm that Tailscale is working by running `tailscale status`
-
-### Management
-
-#### Configuring Tailscale
+### Configuring Tailscale
 
 You can configure Tailscale using all the normal `tailscale up` options, you should be able to
 find `tailscale` on your path after installation.
@@ -58,7 +58,7 @@ find `tailscale` on your path after installation.
 tailscale up --advertise-routes=10.0.0.0/24 --advertise-exit-node --advertise-tags=tag:it
 ```
 
-#### Restarting Tailscale
+### Restarting Tailscale
 
 On UniFi OS 2.x+, Tailscale is managed using `systemd` and the `tailscaled` service. You can
 restart it using the following command.
@@ -67,18 +67,18 @@ restart it using the following command.
 systemctl restart tailscaled
 ```
 
-#### Upgrading Tailscale
+### Upgrading Tailscale
 
 Upgrading Tailscale on UniFi OS 2.x+ can be done either using `apt` or by using the `manage.sh`
 helper script.
 
-##### Using `apt`
+#### Using `apt`
 
 ```sh
 apt update && apt install -y tailscale
 ```
 
-##### Using `manage.sh`
+#### Using `manage.sh`
 
 ```sh
 /data/tailscale/manage.sh update
@@ -87,7 +87,7 @@ apt update && apt install -y tailscale
 nohup /data/tailscale/manage.sh update!
 ```
 
-#### Remove Tailscale
+### Remove Tailscale
 
 To remove Tailscale, you can run the following command, or run the steps below manually.
 
@@ -95,7 +95,7 @@ To remove Tailscale, you can run the following command, or run the steps below m
 /data/tailscale/manage.sh uninstall
 ```
 
-##### Manual Steps
+#### Manual Steps
 
 1. Kill the `tailscaled` daemon with `systemctl stop tailscaled`.
 2. Remove the `tailscale` package using `dpkg -P tailscale`.
