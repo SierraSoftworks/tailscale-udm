@@ -53,8 +53,8 @@ fi
 
 # Test SQL generation (mock)
 # Using a more portable sed command for macOS
-cert_content=$(cat "$test_dir/test.crt" | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
-key_content=$(cat "$test_dir/test.key" | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
+cert_content=$(awk '{printf "%s\\n", $0}' "$test_dir/test.crt" | sed 's/\\n$//')
+key_content=$(awk '{printf "%s\\n", $0}' "$test_dir/test.key" | sed 's/\\n$//')
 
 # Verify content transformation
 assert_contains "$cert_content" "BEGIN CERTIFICATE" "Certificate content includes header"

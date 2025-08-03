@@ -61,6 +61,7 @@ test_cert_generate() {
     mkdir -p "$TAILSCALE_ROOT"
     
     # Mock running state
+    # shellcheck disable=SC2317
     _tailscale_is_running() { return 0; }
     
     # Test generate
@@ -84,6 +85,7 @@ test_cert_renew() {
     mkdir -p "$TAILSCALE_ROOT/certs"
     
     # Mock running state
+    # shellcheck disable=SC2317
     _tailscale_is_running() { return 0; }
     
     # Create existing certificates

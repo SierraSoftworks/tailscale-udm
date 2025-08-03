@@ -12,8 +12,8 @@ if [ -z "$cert_uuid" ] || [ -z "$cert_file" ] || [ -z "$key_file" ]; then
 fi
 
 # Read certificate content and escape for PostgreSQL
-cert_content=$(cat "$cert_file" | sed "s/'/\'\'/g")
-key_content=$(cat "$key_file" | sed "s/'/\'\'/g")
+cert_content=$(sed "s/'/\'\'/g" "$cert_file")
+key_content=$(sed "s/'/\'\'/g" "$key_file")
 
 # Extract certificate details using openssl
 if command -v openssl >/dev/null 2>&1; then
