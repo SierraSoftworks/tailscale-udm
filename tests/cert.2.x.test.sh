@@ -65,15 +65,15 @@ test_cert_generate() {
     
     # Test generate
     output=$(_tailscale_cert generate 2>&1)
-    assert_contains "$output" "Certificate generated successfully"
-    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt"
-    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key"
-    
+    assert_contains "$output" "Certificate generated successfully" "Output contains success message"
+    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" "Certificate file exists"
+    assert_file_exists "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" "Key file exists"
+
     # Check file permissions
     cert_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" | cut -c4-6)
     key_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" | cut -c4-6)
-    assert_equals "644" "$cert_perms"
-    assert_equals "600" "$key_perms"
+    assert_equals "644" "$cert_perms" "Certificate permissions are correct"
+    assert_equals "600" "$key_perms" "Key permissions are correct"
     
     rm -rf "$TAILSCALE_ROOT/certs"
 }
@@ -93,12 +93,12 @@ test_cert_renew() {
     
     # Test renew
     output=$(_tailscale_cert renew 2>&1)
-    assert_contains "$output" "Certificate renewed successfully"
-    
+    assert_contains "$output" "Certificate renewed successfully" "Output contains success message"
+
     # Check that certificates were updated
     cert_content=$(cat "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt")
-    assert_equals "CERTIFICATE" "$cert_content"
-    
+    assert_equals "CERTIFICATE" "$cert_content" "Certificate content is correct"
+
     rm -rf "$TAILSCALE_ROOT/certs"
 }
 
@@ -115,11 +115,11 @@ test_cert_list() {
     
     # Test list
     output=$(_tailscale_cert list 2>&1)
-    assert_contains "$output" "host1"
-    assert_contains "$output" "host2"
-    assert_contains "$output" "Certificate:"
-    assert_contains "$output" "Private key:"
-    
+    assert_contains "$output" "host1" "Output contains host1"
+    assert_contains "$output" "host2" "Output contains host2"
+    assert_contains "$output" "Certificate:" "Output contains Certificate:"
+    assert_contains "$output" "Private key:" "Output contains Private key:"
+
     rm -rf "$TAILSCALE_ROOT/certs"
 }
 
@@ -133,19 +133,19 @@ test_cert_not_running() {
     
     # Test generate when not running
     output=$(_tailscale_cert generate 2>&1 || true)
-    assert_contains "$output" "Tailscale is not running"
-    
+    assert_contains "$output" "Tailscale is not running" "Output contains not running message"
+
     rm -rf "$TAILSCALE_ROOT"
 }
 
 # Test help command
 test_cert_help() {
     output=$(_tailscale_cert help 2>&1)
-    assert_contains "$output" "Usage:"
-    assert_contains "$output" "generate"
-    assert_contains "$output" "renew"
-    assert_contains "$output" "list"
-    assert_contains "$output" "install-unifi"
+    assert_contains "$output" "Usage:" "Output contains usage title"
+    assert_contains "$output" "generate" "Output contains generate command"
+    assert_contains "$output" "renew" "Output contains renew command"
+    assert_contains "$output" "list" "Output contains list command"
+    assert_contains "$output" "install-unifi" "Output contains install-unifi command"
 }
 
 # Run tests
