@@ -10,7 +10,7 @@ tailscale_status() {
     exit 1
   elif systemctl is-active --quiet tailscaled; then
     echo "Tailscaled is running"
-    $TAILSCALE --version
+    tailscale --version
   else
     echo "Tailscaled is not running"
   fi
@@ -133,7 +133,7 @@ tailscale_uninstall() {
 }
 
 tailscale_has_update() {
-  CURRENT_VERSION="$($TAILSCALE --version | head -n 1)"
+  CURRENT_VERSION="$(tailscale --version | head -n 1)"
   TARGET_VERSION="${1:-$(curl --ipv4 -sSLq 'https://pkgs.tailscale.com/stable/?mode=json' | jq -r '.Tarballs.arm64 | capture("tailscale_(?<version>[^_]+)_").version')}"
   if [ "${CURRENT_VERSION}" != "${TARGET_VERSION}" ]; then
     return 0
