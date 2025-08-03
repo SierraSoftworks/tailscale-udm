@@ -1,7 +1,7 @@
-# Tailscale on Unifi Dream Machine
+# Tailscale on UniFi Dream Machine
 
 This repo contains the scripts necessary to install and run a [tailscale](https://tailscale.com)
-instance on your [Unifi Dream Machine](https://unifi-network.ui.com/dreammachine) (UDM/UDM Pro/UDR/UDM-SE).
+instance on your [UniFi Dream Machine](https://unifi-network.ui.com/dreammachine) (UDM/UDM Pro/UDR/UDM-SE).
 It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https://github.com/boostchicken/udm-utilities)
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
@@ -126,16 +126,102 @@ tailscale up --advertise-routes="10.0.0.0/24,192.168.0.0/24"
 
 ### Can I route traffic from machines on my local network to Tailscale endpoints automatically?
 
-In theory, yes - however it does require manual changes to your routing rules and these will need
-to be updated if you take advantage of WAN fail-over. This has been discussed in more detail on
-[this GitHub discussion thread](https://github.com/SierraSoftworks/tailscale-udm/discussions/51).
+Yes! As of January 30, 2025, [two][tailscale-pr10828] [changes][tailscale-pr14452] to Tailscale have made this
+possible. Much credit goes to @tomvoss and @jasonwbarnett, who contributed significant effort to
+the initial implementation, detailed [in this GitHub issue][tailnet-routing-discussion].
+Before going further please read tailscale's [subnet router documentation][tailscale-subnet-router-docs]
+and familiarize yourself with the concepts of subnet routers, independent of UniFi OS.
 
-*Note that we do not currently include this in `tailscale-udm` due to the risk of breaking conflicts in future.*
+#### Prerequisites
+
+Before proceeding, please review Tailscale’s [subnet router documentation][tailscale-subnet-router-docs]
+to understand the core concepts of subnet routing, independent of UniFi OS.
+
+**NOTE**: You do not need to manually enable `net.ipv4.ip_forward` on your UniFi OS
+device as it is enabled by default. If you want to confirm its status, run:
+
+```sh
+sysctl net.ipv4.ip_forward
+```
+
+**WARNING**: You should conduct all of these changes over a direct network connection to your
+UniFi OS device, as you may lose access to the device if you misconfigure Tailscale or other network
+settings.
+
+#### Switch to TUN mode
+
+The quickest way to switch to TUN mode is to install the latest version of tailscale-udm, which
+will automatically configure Tailscale to use TUN mode.
+
+```bash
+curl -sSLq https://raw.github.com/SierraSoftworks/tailscale-udm/main/install.sh | sh
+```
+
+##### Manually Switching to TUN Mode
+
+If you have been running Tailscale on your UniFi device for a while, there is a good chance
+that you are running in "userspace" networking mode. This mode is not compatible with advertising
+routes, so you will need to switch to TUN mode.
+
+To do so, edit your `/data/tailscale/tailscale-env` file and ensure that the
+`TAILSCALED_FLAGS` variable does **NOT** include the `--tun userspace-networking` flag. Unless you
+have manually configured any other options, it should look like this:
+
+```bash
+PORT="41641"
+TAILSCALED_FLAGS=""
+TAILSCALE_FLAGS=""
+TAILSCALE_AUTOUPDATE="true"
+TAILSCALE_CHANNEL="stable"
+```
+
+Then re-configure Tailscale by running `/data/tailscale/manage.sh install`, which will
+update your `/etc/default/tailscaled` file to use the new configuration and restart the
+`tailscaled` service.
+
+#### Verifying Your Setup
+
+To ensure that Tailscale is running correctly, check for the existence of the
+tailscale0 network interface:
+
+```sh
+ip link show tailscale0
+```
+
+A successful setup should return output similar to:
+
+```text
+129: tailscale0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1280 qdisc pfifo_fast state UNKNOWN mode DEFAULT group default qlen 500
+    link/none
+```
+
+If you see `Device "tailscale0" does not exist.` instead, it means you are still running in
+[userspace networking mode][tailscale-userspace-networking-docs], which will not
+work. Follow the steps above to switch to TUN mode and try again.
+
+#### Final Configuration
+
+Once you have verified that you are not running in userspace networking mode, proceed with configuring Tailscale:
+
+```sh
+tailscale up --advertise-exit-node --advertise-routes="<one-or-more-local-subnets>" --snat-subnet-routes=false --accept-routes --reset
+```
+
+Example:
+
+```sh
+tailscale up --advertise-exit-node --advertise-routes="10.0.0.0/24" --snat-subnet-routes=false --accept-routes --reset
+```
+
+For more details on available options, see the official [tailscale up command documentation][tailscale-up-docs].
 
 ### Why can't I see a network interface for Tailscale?
 
-Tailscale runs as a userspace networking component on the UDM rather than as a TUN
-interface, which means you won't see it in the `ip addr` list.
+Legacy versions of the tailscale-udm script configured Tailscale to run in userspace networking
+mode on the UDM rather than as a TUN interface, which meant you wouldn't see it in the `ip addr` list.
+
+If you are running an older version of tailscale-udm, you can switch to TUN mode by following
+the [instructions above](#manually-switching-to-tun-mode).
 
 ### Does this support Tailscale SSH?
 
@@ -183,3 +269,10 @@ The hostname is automatically determined from your Tailscale configuration.
 On UniFi OS 2.x+, a systemd timer is automatically installed when you generate
 your first certificate. This timer runs weekly to check and renew certificates
 before they expire.
+
+[tailscale-pr10828]: https://github.com/tailscale/tailscale/pull/10828
+[tailscale-pr14452]: https://github.com/tailscale/tailscale/pull/14452
+[tailnet-routing-discussion]: https://github.com/SierraSoftworks/tailscale-udm/discussions/51
+[tailscale-subnet-router-docs]: https://tailscale.com/kb/1019/subnets
+[tailscale-up-docs]: https://tailscale.com/kb/1241/tailscale-up
+[tailscale-userspace-networking-docs]: https://tailscale.com/kb/1112/userspace-networking
