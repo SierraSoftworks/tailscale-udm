@@ -81,51 +81,6 @@ EOF
 chmod +x "${WORKDIR}/tailscale"
 
 
-# Mock the tailscale cert command
-mock_tailscale_cert() {
-    while [ $# -gt 0 ]; do
-        case "$1" in
-            --cert-file)
-                cert_file="$2"
-                shift 2
-                ;;
-            --key-file)
-                key_file="$2"
-                shift 2
-                ;;
-            *)
-                #hostname="$1"
-                shift
-                ;;
-        esac
-    done
-    
-    if [ -n "$cert_file" ] && [ -n "$key_file" ]; then
-        echo "CERTIFICATE" > "$cert_file"
-        echo "PRIVATE KEY" > "$key_file"
-        return 0
-    fi
-    return 1
-}
-
-# Override tailscale command for testing
-tailscale() {
-    case "$1" in
-        cert)
-            shift
-            mock_tailscale_cert "$@"
-            ;;
-        status)
-            if [ "$2" = "--json" ]; then
-                echo '{"Self": {"DNSName": "test-host.example.ts.net."}}'
-            fi
-            ;;
-        *)
-            return 0
-            ;;
-    esac
-}
-
 # Test certificate generation
 test_cert_generate() {
     touch "$TAILSCALED_SOCK"  # Mock running state
@@ -139,9 +94,9 @@ test_cert_generate() {
     # Check file permissions
     cert_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt" | cut -c4-6)
     key_perms=$(stat -c %a "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" 2>/dev/null || stat -f %p "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key" | cut -c4-6)
-    assert_equals "644" "$cert_perms" "Certificate permissions are correct"
-    assert_equals "600" "$key_perms" "Key permissions are correct"
-    
+    assert_eq "644" "$cert_perms" "Certificate permissions are correct"
+    assert_eq "600" "$key_perms" "Key permissions are correct"
+
     rm -rf "$TAILSCALE_ROOT/certs"
 }
 
@@ -160,27 +115,25 @@ test_cert_renew() {
 
     # Check that certificates were updated
     cert_content=$(cat "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt")
-    assert_equals "CERTIFICATE" "$cert_content" "Certificate content is correct"
+    assert_eq "CERTIFICATE" "$cert_content" "Certificate content is correct"
 
     rm -rf "$TAILSCALE_ROOT/certs"
 }
 
 # Test certificate listing
-test_cert_list() {
+test_cert_info() {
     mkdir -p "$TAILSCALE_ROOT/certs"
     
     # Create test certificates
-    echo "CERT1" > "$TAILSCALE_ROOT/certs/host1.crt"
-    echo "KEY1" > "$TAILSCALE_ROOT/certs/host1.key"
-    echo "CERT2" > "$TAILSCALE_ROOT/certs/host2.crt"
-    echo "KEY2" > "$TAILSCALE_ROOT/certs/host2.key"
-    
+    echo "CERT" > "$TAILSCALE_ROOT/certs/test-host.example.ts.net.crt"
+    echo "KEY" > "$TAILSCALE_ROOT/certs/test-host.example.ts.net.key"
+
     # Test list
-    output=$("${ROOT}/package/manage.sh" cert list 2>&1)
-    assert_contains "$output" "host1" "Output contains host1"
-    assert_contains "$output" "host2" "Output contains host2"
-    assert_contains "$output" "Certificate:" "Output contains Certificate:"
-    assert_contains "$output" "Private key:" "Output contains Private key:"
+    output=$("${ROOT}/package/manage.sh" cert info 2>&1)
+    assert_contains "$output" "Certificate:" "Output contains Certificate path"
+    assert_contains "$output" "test-host.example.ts.net.crt" "Output contains test-host.example.ts.net.crt"
+    assert_contains "$output" "Private key:" "Output contains Private key path"
+    assert_contains "$output" "test-host.example.ts.net.key" "Output contains test-host.example.ts.net.key"
 
     rm -rf "$TAILSCALE_ROOT/certs"
 }
@@ -203,14 +156,14 @@ test_cert_help() {
     assert_contains "$output" "Usage:" "Output contains usage title"
     assert_contains "$output" "generate" "Output contains generate command"
     assert_contains "$output" "renew" "Output contains renew command"
-    assert_contains "$output" "list" "Output contains list command"
+    assert_contains "$output" "info" "Output contains info command"
     assert_contains "$output" "install-unifi" "Output contains install-unifi command"
 }
 
 # Run tests
 test_cert_generate
 test_cert_renew
-test_cert_list
+test_cert_info
 test_cert_not_running
 test_cert_help
 

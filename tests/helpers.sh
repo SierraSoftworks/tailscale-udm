@@ -12,6 +12,19 @@ assert() {
     fi
 }
 
+assert_file_exists() {
+    local FILE_PATH="${1?You must specify the file path as the first argument}"
+    local TEST_NAME="${2?You must specify the test name as the second argument}"
+
+    if [[ -f "$FILE_PATH" ]]; then
+        echo "  ✅  $TEST_NAME"
+    else
+        echo "  ❌  $TEST_NAME"
+        echo "    File does not exist: $FILE_PATH"
+        exit 1
+    fi
+}
+
 assert_eq() {
     local ACTUAL_OUTPUT="${1?You must specify the actual output first argument}"
     local EXPECTED_OUTPUT="${2?You must specify the expected output as the second argument}"
