@@ -98,8 +98,10 @@ To remove Tailscale, you can run the following command, or run the steps below m
 #### Manual Steps
 
 1. Kill the `tailscaled` daemon with `systemctl stop tailscaled`.
-2. Remove the `tailscale` package using `dpkg -P tailscale`.
+2. Remove the `tailscale` & `tailscale-archive-keyring` package using `dpkg -P tailscale tailscale-archive-keyring`.
 3. Remove the management script and state using `rm -Rf /data/tailscale`.
+4. Remove the `on_boot.d` script using `rm /data/on_boot.d/10-tailscaled.sh`.
+5. Remove the `cache` folder using `rm -rf /var/cache/tailscale`.
 
 ## Contributing
 
