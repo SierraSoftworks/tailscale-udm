@@ -7,7 +7,7 @@ jobs:
     name: "Package"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: ./build/package.sh ./ ./dist
       - uses: actions/upload-artifact@v4
         with:
@@ -18,5 +18,5 @@ jobs:
     name: Test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: ./tests/run.sh
