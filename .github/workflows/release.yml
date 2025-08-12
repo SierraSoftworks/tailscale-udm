@@ -9,7 +9,7 @@ jobs:
     name: "Package"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: ./build/package.sh ./ ./dist
       - uses: SierraSoftworks/gh-releases@v1.0.7
         with:
