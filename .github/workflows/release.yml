@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: ./build/package.sh ./ ./dist
-      - uses: SierraSoftworks/gh-releases@v1.0.7
+      - uses: SierraSoftworks/gh-releases@v1.0.8
         with:
           files: ./dist/tailscale-udm.tgz
           overwrite: 'true'
