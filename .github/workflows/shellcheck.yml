@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Register ShellCheck problem matchers
       uses: lumaxis/shellcheck-problem-matchers@v2.1.0
