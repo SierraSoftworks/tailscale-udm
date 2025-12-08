@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # arguments: cert_uuid crt_file key_file hostname
 CERT_UUID=$1
@@ -54,8 +54,8 @@ dns=""
 ip=""
 for i in $(echo "$SAN_RAW" | sed 's/,/ /g'); do
     case "$i" in
-        DNS:*) dns="${dns}${dns:+,}\"$(echo "$i" | sed 's/DNS://')\"" ;;
-        IPAddress:*) ip="${ip}${ip:+,}\"$(echo "$i" | sed 's/IPAddress://')\"" ;;
+        DNS:*) dns="${dns}${dns:+,}\"${i#DNS:}\"" ;;
+        IPAddress:*) ip="${ip}${ip:+,}\"${i#IPAddress:}\"" ;;
     esac
 done
 SAN_JSON="{"
