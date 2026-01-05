@@ -1,8 +1,8 @@
 # Tailscale on UniFi Dream Machine
 
 This repo contains the scripts necessary to install and run a [tailscale](https://tailscale.com)
-instance on your [UniFi Dream Machine](https://unifi-network.ui.com/dreammachine) (UDM/UDM Pro/UDR/UDM-SE).
-It does so by piggy-backing on the excellent [boostchicken/udm-utilities](https://github.com/boostchicken/udm-utilities)
+instance on your [UniFi Cloud Gateways](https://ui.com/cloud-gateways).
+It does so by piggy-backing on the excellent [unifi-utilities](https://github.com/unifi-utilities/unifios-utilities)
 to provide a persistent service and runs using Tailscale's usermode networking feature.
 
 ## Installation
